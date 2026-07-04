@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:4321
+Then open http://localhost:4321/resumemaker-agent
 
 ```bash
 npm run build      # production build -> dist/
@@ -24,6 +24,9 @@ npm run preview    # preview the production build
 
 ```
 src/
+  branding/
+    Logo_dark.svg               Light-mode logo (dark text, light gradient bg)
+    Logo_light.svg              Dark-mode logo (white text, dark gradient bg)
   layouts/BaseLayout.astro     Shared shell: nav, footer, dark mode, fonts, SEO meta
   pages/
     index.astro                Home (includes a live dark-mode demo switch)
@@ -44,6 +47,17 @@ src/
   styles/global.css               Tailwind layers, iOS-style switch ("dongle"), .ios-card,
                                    and the .rsm-* resume-document design system
 ```
+
+## Branding logos
+
+Two SVG logos in `src/branding/` and `public/branding/`:
+
+| File | Mode | Description |
+|------|------|-------------|
+| `Logo_dark.svg` | Light mode | Dark text on light gradient — shown when site is in light theme |
+| `Logo_light.svg` | Dark mode | White text on dark gradient — shown when site is in dark theme |
+
+The logos auto-switch in the **header**, **footer**, and **mobile menu** using Tailwind's `dark:` class strategy tied to the existing theme toggle.
 
 ## Design system notes
 
