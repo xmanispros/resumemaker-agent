@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 
-const siteUrl = 'https://resumemakeragent.com';
+const siteUrl = 'https://xmanispros.github.io/resumemaker-agent';
 
 const staticPages = [
   { path: '/', priority: '1.0' },
