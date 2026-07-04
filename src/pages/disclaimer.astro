@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Disclaimer | ResumeMaker Agent';
+const description = 'Disclaimer for ResumeMaker Agent — a free, AI-guided online resume maker.';
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "Disclaimer", "item": "https://resumemakeragent.com/disclaimer" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/disclaimer">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16" style="background: var(--neu-bg);">
+    <div class="neu-badge inline-block mb-4">
+      <p class="eyebrow">Legal</p>
+    </div>
+    <h1 class="text-4xl font-semibold style="color: var(--neu-text);">Disclaimer</h1>
+    <p class="mt-2 text-sm style="color: var(--neu-text-dim);">Last updated: June 2026</p>
+
+    <div class="neu-card mt-8 space-y-6 p-6 sm:p-8">
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">No guarantee of job outcomes</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          ResumeMaker Agent helps you structure and format a resume. We don't guarantee interviews, job
+          offers, or any specific hiring outcome — results depend on your experience, the role, and the
+          hiring process at each employer.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">AI assistance</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          Where AI helps structure or suggest wording, you're responsible for reviewing the final resume
+          for accuracy before sending it to an employer.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">Third-party links and ads</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          The single ad slot shown before download is served by Google AdSense. We don't control the
+          specific ads shown and aren't responsible for third-party content or websites linked from ads.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">ATS-friendly claims</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          Templates labeled "ATS-Friendly" are designed with clean structure to parse well in most
+          applicant tracking systems, but ATS behavior varies by employer and software — we can't
+          guarantee compatibility with every system.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

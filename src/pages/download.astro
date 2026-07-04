@@ -1,0 +1,740 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { templates } from '../lib/templates';
+
+const title = 'Download Your Free Resume PDF / DOCX | ResumeMaker Agent';
+const description = 'Download your resume as PDF or Word (.docx) — no watermark, no login, no payment.';
+const templatesJson = JSON.stringify(
+  templates.map((t) => ({ id: t.id, name: t.name, accent: t.accent, surface: t.surface, layout: t.layout, font: t.font }))
+);
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "Download", "item": "https://resumemakeragent.com/download" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/download">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <section class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12 md:py-16" style="background: var(--neu-bg);">
+    <div class="neu-badge inline-block mb-4">
+      <p class="eyebrow">Final step</p>
+    </div>
+    <h1 class="text-2xl font-semibold sm:text-3xl" style="color: var(--neu-text);">Your resume is ready.</h1>
+    <p class="mt-2" style="color: var(--neu-text-dim);">Pick a format below to download — no watermark, no login.</p>
+
+    <!-- Template chooser on download page -->
+    <div class="neu-card mt-6 p-4 sm:mt-8 sm:p-6">
+      <p class="mb-3 text-sm font-medium" style="color: var(--neu-text);">Choose a template:</p>
+      <div id="download-template-grid" class="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3"></div>
+    </div>
+
+    <div class="mt-6 rsm-frame mx-auto max-w-sm sm:mt-8 sm:max-w-md">
+      <div id="resume-preview"></div>
+    </div>
+
+    <div class="neu-card mx-auto mt-6 max-w-sm p-4 sm:mt-8 sm:max-w-md sm:p-6">
+      <p class="mb-3 text-sm font-medium sm:mb-4" style="color: var(--neu-text);">Choose download format:</p>
+
+      <div class="grid grid-cols-2 gap-2 sm:gap-3">
+        <button data-format="pdf" class="format-btn active">
+          <svg class="mx-auto mb-1 h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          <span class="text-xs font-semibold">PDF</span>
+        </button>
+        <button data-format="docx" class="format-btn">
+          <svg class="mx-auto mb-1 h-6 w-6 sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span class="text-xs font-semibold">Word</span>
+        </button>
+      </div>
+
+      <button id="start-download" class="neu-btn-primary mt-4 w-full justify-center sm:mt-5">Download Resume</button>
+      <div id="download-progress" class="mt-3 hidden">
+        <div class="neu-slider-track">
+          <div id="progress-fill" class="neu-slider-fill" style="width: 0%;"></div>
+        </div>
+        <p id="ad-progress" class="mt-2 text-xs text-center" style="color: var(--neu-text-dim);">Preparing your file…</p>
+      </div>
+      <p id="download-error" class="mt-2 hidden text-xs text-center text-red-500"></p>
+    </div>
+
+    <p class="mt-4 text-center text-xs sm:mt-6" style="color: var(--neu-text-dim);">
+      Need changes? <a href="/builder" class="text-teal hover:underline">Go back to the builder</a>.
+    </p>
+  </section>
+
+  <script is:inline src="/js/html2canvas.min.js"></script>
+  <script is:inline src="/js/jspdf.umd.min.js"></script>
+  <script is:inline src="/js/docx.min.js"></script>
+
+  <script is:inline define:vars={{ templatesJson }}>
+  (function () {
+    var allTemplates = JSON.parse(templatesJson);
+    var STORAGE_KEY = 'rma-resume-data';
+    var TEMPLATE_KEY = 'rma-selected-template';
+    var selectedFormat = 'pdf';
+    var currentTplId = null;
+
+    /* ── Helpers ── */
+    function defaultData() {
+      return {
+        fullName:'Manish Kumar', photo:'', contactType:'email',
+        contactValue:'manish.kumar@email.com', location:'Hyderabad, India',
+        summary:'Detail-oriented MBA graduate with 3+ years of experience in product strategy and business analytics. Skilled in stakeholder management, data-driven decision making, and cross-functional team leadership.',
+        skills:['Product Strategy','Data Analysis','SQL','Excel','Stakeholder Management','Agile / Scrum','JIRA','Wireframing'],
+        education:[
+          {degree:'MBA — Product Management',school:'Indian School of Business',year:'2022 – 2024'},
+          {degree:'B.Tech — Computer Science',school:'JNTU Hyderabad',year:'2017 – 2021'}
+        ],
+        experience:[
+          {role:'Associate Product Manager',company:'Freshworks',duration:'2024 – Present',description:'Led the redesign of the onboarding flow for SaaS customers, increasing activation rate by 18%.'},
+          {role:'Product Analyst Intern',company:'Infosys',duration:'2023 – 2024',description:'Built dashboards tracking KPIs for 12 enterprise clients using SQL and Tableau.'}
+        ],
+        projects:[
+          {name:'ResumeMaker Agent',description:'Built an AI-guided resume builder with live preview and free PDF download.'},
+          {name:'SmartDash — Expense Tracker',description:'Personal finance web app with React and Node.js.'}
+        ],
+        links:['linkedin.com/in/manishkumar','github.com/manishkumar']
+      };
+    }
+
+    function loadData() {
+      try { var raw=localStorage.getItem(STORAGE_KEY); if(raw){var s=JSON.parse(raw);if(s.fullName&&s.fullName.trim())return Object.assign(defaultData(),s);}} catch(e){}
+      return defaultData();
+    }
+    function loadTemplate(fb){return localStorage.getItem(TEMPLATE_KEY)||fb;}
+    function saveTemplate(id){localStorage.setItem(TEMPLATE_KEY,id);}
+
+    function esc(s){if(!s)return '';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    function ini(n){if(!n)return '?';return n.trim().split(/\s+/).slice(0,2).map(function(w){return w[0]?w[0].toUpperCase():'';}).join('');}
+    function contactLine(d){var b=[];if(d.contactValue)b.push(esc(d.contactValue));if(d.location)b.push(esc(d.location));return b.join('  •  ');}
+    function sec(title,html){if(!html)return '';return '<div class="rsm-section"><h3 class="rsm-section-title">'+esc(title)+'</h3>'+html+'</div>';}
+    function lst(items,fn){var v=(items||[]).filter(function(i){return i&&Object.values(i).some(Boolean);});if(!v.length)return '';return v.map(fn).join('');}
+
+    /* ── HTML builder for preview ── */
+    function buildHTML(d,t){
+      var ac=t.accent,sf=t.surface,fc=t.font==='display'?'font-display':'font-sans';
+      var name=esc(d.fullName)||'Your Name';
+      var photo=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.fullName)+'" class="rsm-photo"/>':'<div class="rsm-photo rsm-photo-fallback" style="background:'+ac+'">'+ini(d.fullName)+'</div>';
+      var summ=d.summary?'<p class="rsm-body">'+esc(d.summary)+'</p>':'';
+      var skills='';
+      if(d.skills&&d.skills.length){skills='<div class="rsm-skills">'+d.skills.filter(Boolean).map(function(s){return '<span class="rsm-pill" style="border-color:'+ac+';color:'+ac+'">'+esc(s)+'</span>';}).join('')+'</div>';}
+      var edu=lst(d.education,function(e){return '<div class="rsm-item"><div class="rsm-item-head"><span class="rsm-item-title">'+esc(e.degree)+'</span><span class="rsm-item-meta">'+esc(e.year)+'</span></div><div class="rsm-item-sub">'+esc(e.school)+'</div></div>';});
+      var exp=lst(d.experience,function(e){return '<div class="rsm-item"><div class="rsm-item-head"><span class="rsm-item-title">'+esc(e.role)+'</span><span class="rsm-item-meta">'+esc(e.duration)+'</span></div><div class="rsm-item-sub">'+esc(e.company)+'</div>'+(e.description?'<p class="rsm-body" style="margin-top:4px">'+esc(e.description)+'</p>':'')+'</div>';});
+      var proj=lst(d.projects,function(p){return '<div class="rsm-item"><div class="rsm-item-head"><span class="rsm-item-title">'+esc(p.name)+'</span></div>'+(p.description?'<p class="rsm-body" style="margin-top:4px">'+esc(p.description)+'</p>':'')+'</div>';});
+      var links='';
+      if(d.links&&d.links.length){links='<div class="rsm-links">'+d.links.filter(Boolean).map(function(l){return '<span class="rsm-link">'+esc(l)+'</span>';}).join('')+'</div>';}
+      var hdr='<div class="rsm-header">'+photo+'<div><h1 class="rsm-name '+fc+'">'+name+'</h1><p class="rsm-contact">'+contactLine(d)+'</p></div></div>';
+      var side=sec('Skills',skills)+sec('Education',edu)+sec('Links',links);
+      var main=sec('Summary',summ)+sec('Experience',exp)+sec('Projects',proj);
+      if(t.layout==='single-column')return '<div class="rsm-doc rsm-single '+fc+'">'+hdr+'<hr class="rsm-rule" style="border-color:'+ac+'33"/>'+main+sec('Skills',skills)+sec('Education',edu)+sec('Links',links)+'</div>';
+      if(t.layout==='header-band')return '<div class="rsm-doc rsm-band '+fc+'"><div class="rsm-band-top" style="background:'+sf+'1A">'+hdr+'</div><div class="rsm-band-grid"><div>'+main+'</div><div>'+side+'</div></div></div>';
+      var sf2=t.layout==='sidebar-left';
+      var sp='<div class="rsm-sidebar" style="background:'+sf+'">'+photo+'<h1 class="rsm-name rsm-name-sidebar '+fc+'">'+name+'</h1><p class="rsm-contact rsm-contact-sidebar">'+contactLine(d)+'</p><div class="rsm-sidebar-sections">'+sec('Skills',skills)+sec('Education',edu)+sec('Links',links)+'</div></div>';
+      var mp='<div class="rsm-main">'+main+'</div>';
+      return '<div class="rsm-doc rsm-sidebar-layout '+fc+'" style="flex-direction:'+(sf2?'row':'row-reverse')+'">'+sp+mp+'</div>';
+    }
+
+    var data=loadData();
+    var tplId=loadTemplate(allTemplates[0].id);
+    currentTplId=tplId;
+
+    function renderPreview(){
+      var t=allTemplates.find(function(x){return x.id===currentTplId;})||allTemplates[0];
+      document.getElementById('resume-preview').innerHTML=buildHTML(data,t);
+    }
+    renderPreview();
+
+    /* ── Template chooser grid ── */
+    var gridEl=document.getElementById('download-template-grid');
+    var SAMPLES=[
+      {name:'Alex Carter',role:'Product Designer',contact:'alex@email.com',skills:['Figma','UX Research','Prototyping']},
+      {name:'Priya Sharma',role:'Marketing Manager',contact:'priya@email.com',skills:['SEO','Content','Analytics']},
+      {name:'Rohan Verma',role:'Software Engineer',contact:'rohan@email.com',skills:['React','Node.js','AWS']},
+      {name:'Sara Khan',role:'Business Analyst',contact:'sara@email.com',skills:['Excel','SQL','Power BI']},
+      {name:'Manish Kumar',role:'MBA Candidate',contact:'manish@email.com',skills:['Strategy','Finance','Product']},
+    ];
+    allTemplates.slice(0,12).forEach(function(t,ti){
+      var btn=document.createElement('button');
+      btn.type='button';
+      btn.className='rounded-xl p-1.5 text-left transition-all duration-200';
+      btn.style.background='var(--neu-bg)';
+      btn.style.boxShadow=t.id===currentTplId
+        ? 'inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light)'
+        : '3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light)';
+      if(t.id===currentTplId){
+        btn.style.outline='2px solid #2196F3';
+        btn.style.outlineOffset='2px';
+      }
+      var sample=SAMPLES[ti%SAMPLES.length];
+      var initials=sample.name.split(' ').map(function(w){return w[0];}).join('');
+      var miniHtml='';
+      if(t.layout==='sidebar-left'||t.layout==='sidebar-right'){
+        miniHtml='<div class="w-full aspect-[210/297] rounded-lg overflow-hidden flex" style="background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+          +'<div class="w-[36%] flex flex-col items-center justify-center gap-[1px] px-[2px]" style="background:'+t.surface+'">'
+          +'<div class="w-[10px] h-[10px] rounded-full bg-white/25 flex items-center justify-center text-[4px] font-bold text-white">'+initials+'</div>'
+          +'<p class="text-[4px] font-semibold text-white leading-tight text-center">'+sample.name.split(' ')[0]+'</p>'
+          +'<p class="text-[3px] text-white/70 leading-tight text-center">'+sample.role.split(' ')[0]+'</p>'
+          +'<p class="text-[2.5px] text-white/50 text-center">'+sample.contact+'</p>'
+          +'</div>'
+          +'<div class="flex-1 p-[3px] flex flex-col">'
+          +'<div class="h-[1.5px] w-[20px] rounded-sm mb-[2px]" style="background:'+t.accent+'"></div>'
+          +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>'
+          +'<div class="space-y-[1px]"><div class="h-[1.5px] w-full rounded bg-gray-200"></div><div class="h-[1.5px] w-3/4 rounded bg-gray-200"></div></div>'
+          +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Experience</p>'
+          +'<div class="h-[1.5px] w-2/3 rounded mb-[1px]" style="background:'+t.accent+'20"></div>'
+          +'<div class="h-[1.5px] w-full rounded bg-gray-200"></div>'
+          +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Skills</p>'
+          +'<div class="flex flex-wrap gap-[0.5px]">'+sample.skills.map(function(sk){return '<span class="text-[2px] px-[2px] rounded" style="color:'+t.accent+'">'+sk+'</span>';}).join('')+'</div>'
+          +'</div></div>';
+      }else if(t.layout==='header-band'){
+        miniHtml='<div class="w-full aspect-[210/297] rounded-lg overflow-hidden flex flex-col" style="background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+          +'<div class="flex items-center gap-[2px] px-[3px] py-[2px]" style="background:'+t.surface+'">'
+          +'<div class="w-[8px] h-[8px] rounded-full bg-white/25 flex items-center justify-center text-[3px] font-bold text-white">'+initials+'</div>'
+          +'<div><p class="text-[4px] font-semibold text-white leading-tight">'+sample.name.split(' ')[0]+'</p>'
+          +'<p class="text-[3px] text-white/70 leading-tight">'+sample.role.split(' ')[0]+'</p></div></div>'
+          +'<div class="flex-1 p-[3px] flex gap-[2px]">'
+          +'<div class="flex-[1.4]"><div class="h-[1.5px] w-[16px] rounded-sm mb-[2px]" style="background:'+t.accent+'"></div>'
+          +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>'
+          +'<div class="space-y-[1px]"><div class="h-[1.5px] w-full rounded bg-gray-200"></div><div class="h-[1.5px] w-3/4 rounded bg-gray-200"></div></div>'
+          +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Experience</p>'
+          +'<div class="h-[1.5px] w-2/3 rounded mb-[1px]" style="background:'+t.accent+'20"></div>'
+          +'<div class="h-[1.5px] w-full rounded bg-gray-200"></div></div>'
+          +'<div class="flex-1"><p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Skills</p>'
+          +'<div class="flex flex-wrap gap-[0.5px]">'+sample.skills.map(function(sk){return '<span class="text-[2px] px-[2px] rounded" style="color:'+t.accent+'">'+sk+'</span>';}).join('')+'</div>'
+          +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mt-[2px] mb-[1px]">Education</p>'
+          +'<p class="text-[2.5px] font-semibold text-gray-700">MBA — Product Mgmt</p>'
+          +'<p class="text-[2.5px] text-gray-400">ISB, 2022</p></div>'
+          +'</div></div>';
+      }else{
+        miniHtml='<div class="w-full aspect-[210/297] rounded-lg overflow-hidden p-[3px] flex flex-col" style="background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+          +'<div class="flex items-center gap-[2px]">'
+          +'<div class="w-[10px] h-[10px] rounded-full flex items-center justify-center text-[4px] font-bold text-white flex-shrink-0" style="background:'+t.accent+'">'+initials+'</div>'
+          +'<div><p class="text-[4px] font-semibold text-gray-800 leading-tight">'+sample.name.split(' ')[0]+'</p>'
+          +'<p class="text-[3px] text-gray-400 leading-tight">'+sample.role.split(' ')[0]+'</p>'
+          +'<p class="text-[2.5px] text-gray-400 leading-tight">'+sample.contact+'</p></div></div>'
+          +'<div class="h-px w-full my-[2px]" style="background:'+t.accent+'40"></div>'
+          +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>'
+          +'<div class="space-y-[1px]"><div class="h-[1.5px] w-full rounded bg-gray-200"></div><div class="h-[1.5px] w-3/4 rounded bg-gray-200"></div></div>'
+          +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Experience</p>'
+          +'<div class="h-[1.5px] w-2/3 rounded mb-[1px]" style="background:'+t.accent+'20"></div>'
+          +'<div class="h-[1.5px] w-full rounded bg-gray-200"></div>'
+          +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Skills</p>'
+          +'<div class="flex flex-wrap gap-[0.5px]">'+sample.skills.map(function(sk){return '<span class="text-[2px] px-[2px] rounded" style="color:'+t.accent+'">'+sk+'</span>';}).join('')+'</div>'
+          +'</div>';
+      }
+      btn.innerHTML=miniHtml+'<p class="text-[8px] font-medium truncate mt-0.5" style="color:var(--neu-text);">'+t.name+'</p>';
+      btn.addEventListener('click',function(){
+        currentTplId=t.id;
+        saveTemplate(t.id);
+        gridEl.querySelectorAll('button').forEach(function(b){
+          b.style.boxShadow='3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light)';
+          b.style.outline='none';
+        });
+        btn.style.boxShadow='inset 3px 3px 6px var(--neu-dark), inset -3px -3px 6px var(--neu-light)';
+        btn.style.outline='2px solid #2196F3';
+        btn.style.outlineOffset='2px';
+        renderPreview();
+      });
+      gridEl.appendChild(btn);
+    });
+
+    /* ── Format selector ── */
+    document.querySelectorAll('.format-btn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        document.querySelectorAll('.format-btn').forEach(function(b){b.classList.remove('active');});
+        btn.classList.add('active'); selectedFormat=btn.dataset.format;
+        document.getElementById('start-download').textContent='Download as '+btn.querySelector('.text-xs').textContent;
+      });
+    });
+
+    /* ══════════════════════════════════════════════════════
+       DOCX generation using the `docx` library
+       ══════════════════════════════════════════════════════ */
+    var D=window.docx;
+
+    function hexNoHash(h){return (h||'').replace('#','');}
+
+    function accentBorder(accent){
+      return{style:D.BorderStyle.SINGLE,size:6,color:hexNoHash(accent),space:1};
+    }
+    function noBorder(){
+      var b={style:D.BorderStyle.NONE,size:0,color:'FFFFFF',space:0};
+      return{top:b,left:b,bottom:b,right:b};
+    }
+    function noCellBorders(){
+      var n={style:D.BorderStyle.NONE,size:0,color:'auto',space:0};
+      return{top:n,left:n,bottom:n,right:n};
+    }
+
+    function secTitle(text,color){
+      return new D.Paragraph({
+        children:[new D.TextRun({text:text.toUpperCase(),bold:true,font:'Arial',size:26,color:hexNoHash(color)})],
+        spacing:{before:120,after:80,line:276},
+        border:{bottom:accentBorder(color)},
+      });
+    }
+
+    function bodyP(text,opts){
+      opts=opts||{};
+      var runs=[];
+      if(opts.runs){runs=opts.runs;}
+      else{runs=[new D.TextRun({text:text||'',font:'Arial',size:opts.sz||28,color:opts.color||'1B2440',bold:!!opts.bold})];}
+      return new D.Paragraph({
+        children:runs,
+        spacing:{before:opts.sb||0,after:opts.sa||60,line:opts.line||276},
+        alignment:opts.align||D.AlignmentType.LEFT,
+      });
+    }
+
+    function mainParas(d,ac){
+      var p=[];
+      if(d.summary){p.push(secTitle('Summary',ac));p.push(bodyP(d.summary,{sz:28,line:300,sa:100}));}
+      if(d.experience&&d.experience.length){
+        p.push(secTitle('Experience',ac));
+        d.experience.forEach(function(e){
+          if(!e.role&&!e.company)return;
+          var title=e.role+(e.company?' — '+e.company:'');
+          p.push(bodyP(title,{bold:true,sz:30,sa:20}));
+          if(e.duration)p.push(bodyP(e.duration,{sz:24,color:'5B6B8C',sa:40}));
+          if(e.description)p.push(bodyP(e.description,{sz:26,line:300,sa:80}));
+        });
+      }
+      if(d.projects&&d.projects.length){
+        p.push(secTitle('Projects',ac));
+        d.projects.forEach(function(p2){
+          if(!p2.name)return;
+          p.push(bodyP(p2.name,{bold:true,sz:30,sa:20}));
+          if(p2.description)p.push(bodyP(p2.description,{sz:26,line:300,sa:80}));
+        });
+      }
+      return p;
+    }
+
+    function sidebarParas(d,name,contactStr){
+      var p=[];
+      p.push(new D.Paragraph({
+        children:[new D.TextRun({text:name,bold:true,font:'Arial',size:44,color:'FFFFFF'})],
+        spacing:{after:120},
+      }));
+      p.push(bodyP(contactStr,{sz:24,color:'FFFFFF',sa:160}));
+
+      if(d.skills&&d.skills.length){
+        p.push(new D.Paragraph({
+          children:[new D.TextRun({text:'SKILLS',bold:true,font:'Arial',size:24,color:'FFFFFF',underline:{}})],
+          spacing:{before:80,after:80},
+        }));
+        d.skills.filter(Boolean).forEach(function(s){
+          p.push(bodyP(s,{sz:24,color:'FFFFFF',line:300,sa:10}));
+        });
+      }
+      if(d.education&&d.education.length){
+        p.push(new D.Paragraph({
+          children:[new D.TextRun({text:'EDUCATION',bold:true,font:'Arial',size:24,color:'FFFFFF',underline:{}})],
+          spacing:{before:80,after:80},
+        }));
+        d.education.forEach(function(e){
+          if(!e.degree&&!e.school)return;
+          p.push(bodyP(e.degree,{sz:24,bold:true,color:'FFFFFF',sa:10}));
+          if(e.school)p.push(bodyP(e.school,{sz:22,color:'FFFFFF',sa:10}));
+          if(e.year)p.push(bodyP(e.year,{sz:20,color:'FFFFFF',sa:60}));
+        });
+      }
+      if(d.links&&d.links.length){
+        p.push(new D.Paragraph({
+          children:[new D.TextRun({text:'LINKS',bold:true,font:'Arial',size:24,color:'FFFFFF',underline:{}})],
+          spacing:{before:80,after:80},
+        }));
+        d.links.filter(Boolean).forEach(function(l){
+          p.push(bodyP(l,{sz:24,color:'FFFFFF',line:300,sa:10}));
+        });
+      }
+      return p;
+    }
+
+    function skillsLinksEduParas(d,ac){
+      var p=[];
+      if(d.skills&&d.skills.length){
+        p.push(secTitle('Skills',ac));
+        var skillText=d.skills.filter(Boolean).join('  •  ');
+        p.push(bodyP(skillText,{sz:26,line:300,sa:100}));
+      }
+      if(d.education&&d.education.length){
+        p.push(secTitle('Education',ac));
+        d.education.forEach(function(e){
+          if(!e.degree&&!e.school)return;
+          p.push(bodyP(e.degree+' — '+e.school,{bold:true,sz:30,sa:20}));
+          if(e.year)p.push(bodyP(e.year,{sz:24,color:'5B6B8C',sa:60}));
+        });
+      }
+      if(d.links&&d.links.length){
+        p.push(secTitle('Links',ac));
+        p.push(bodyP(d.links.filter(Boolean).join('  |  '),{sz:26,line:300,sa:80}));
+      }
+      return p;
+    }
+
+    function emptyPara(){return new D.Paragraph({children:[],spacing:{after:0}});}
+
+    function buildDocx(d,t){
+      var name=d.fullName||'Resume';
+      var contactParts=[];if(d.contactValue)contactParts.push(d.contactValue);if(d.location)contactParts.push(d.location);
+      var contactStr=contactParts.join('  •  ');
+      var ac=t.accent;
+      var sbBg=hexNoHash(ac);
+      var sbBgLight=(function(h){var r=parseInt(h.substring(0,2),16),g=parseInt(h.substring(2,4),16),b=parseInt(h.substring(4,6),16);return((1<<24)+((Math.round(r+(255-r)*0.85))<<16)+((Math.round(g+(255-g)*0.85))<<8)+Math.round(b+(255-b)*0.85)).toString(16).slice(1);})(sbBg);
+
+      var bodyChildren=[];
+      var noTblBorders=noCellBorders();
+      var tblNoBorders=noBorder();
+
+      if(t.layout==='single-column'){
+        bodyChildren.push(new D.Paragraph({
+          children:[new D.TextRun({text:name,bold:true,font:'Arial',size:58,color:'1B2440'})],
+          alignment:D.AlignmentType.CENTER,
+          spacing:{after:40},
+        }));
+        bodyChildren.push(bodyP(contactStr,{sz:26,color:'5B6B8C',align:D.AlignmentType.CENTER,sa:80}));
+        bodyChildren.push(new D.Paragraph({
+          children:[],
+          border:{bottom:accentBorder(ac)},
+          spacing:{after:120},
+        }));
+        bodyChildren=bodyChildren.concat(mainParas(d,ac));
+        bodyChildren=bodyChildren.concat(skillsLinksEduParas(d,ac));
+      } else {
+        var sidebarPar=sidebarParas(d,name,contactStr);
+        var mainPar=mainParas(d,ac);
+        var rightColPar=skillsLinksEduParas(d,ac);
+
+        var sidebarWidth,rightWidth;
+        if(t.layout==='header-band'){sidebarWidth=5200;rightWidth=3826;}
+        else{sidebarWidth=3070;rightWidth=5956;}
+
+        if(t.layout==='header-band'){
+          bodyChildren.push(new D.Paragraph({
+            children:[new D.TextRun({text:name,bold:true,font:'Arial',size:44,color:'1B2440'})],
+            spacing:{after:40},
+          }));
+          bodyChildren.push(bodyP(contactStr,{sz:24,color:'5B6B8C',sa:120}));
+          bodyChildren.push(new D.Paragraph({
+            children:[],
+            border:{bottom:accentBorder(ac)},
+            spacing:{after:80},
+          }));
+          var tblData=[[{paras:mainPar,shade:null},{paras:rightColPar,shade:null}]];
+          var tblRows=tblData.map(function(row){
+            return new D.TableRow({
+              children:row.map(function(cell){
+                return new D.TableCell({
+                  children:cell.paras.length?cell.paras:[emptyPara()],
+                  width:{size:cell===row[0]?5200:3826,type:D.WidthType.DXA},
+                  borders:noTblBorders,
+                  shading:cell.shade?{fill:cell.shade,type:D.ShadingType.CLEAR,color:'auto'}:undefined,
+                  verticalAlign:D.VerticalAlign.TOP,
+                  margins:{top:0,bottom:0,left:120,right:120},
+                });
+              }),
+            });
+          });
+          bodyChildren.push(new D.Table({
+            rows:tblRows,
+            width:{size:9026,type:D.WidthType.DXA},
+            layout:D.FixedLayoutType,
+            borders:tblNoBorders,
+          }));
+        } else {
+          var sbLeft=t.layout==='sidebar-left';
+          var leftColPar=sbLeft?sidebarPar:mainPar.concat(rightColPar);
+          var rightColPar2=sbLeft?mainPar.concat(rightColPar):sidebarPar;
+          var leftW=sbLeft?sidebarWidth:rightWidth;
+          var rightW=sbLeft?rightWidth:sidebarWidth;
+
+          var tblRow=new D.TableRow({
+            children:[
+              new D.TableCell({
+                children:leftColPar.length?leftColPar:[emptyPara()],
+                width:{size:leftW,type:D.WidthType.DXA},
+                borders:noTblBorders,
+                shading:{fill:sbBgLight,type:D.ShadingType.CLEAR,color:'auto'},
+                verticalAlign:D.VerticalAlign.TOP,
+                margins:{top:120,bottom:120,left:160,right:160},
+              }),
+              new D.TableCell({
+                children:rightColPar2.length?rightColPar2:[emptyPara()],
+                width:{size:rightW,type:D.WidthType.DXA},
+                borders:noTblBorders,
+                verticalAlign:D.VerticalAlign.TOP,
+                margins:{top:120,bottom:120,left:160,right:160},
+              }),
+            ],
+          });
+          bodyChildren.push(new D.Table({
+            rows:[tblRow],
+            width:{size:9026,type:D.WidthType.DXA},
+            layout:D.FixedLayoutType,
+            borders:tblNoBorders,
+          }));
+        }
+      }
+
+      var doc=new D.Document({
+        sections:[{
+          properties:{
+            page:{
+              size:{width:11906,height:16838},
+              margin:{top:1440,right:1440,bottom:1440,left:1440,header:720,footer:720},
+            },
+          },
+          children:bodyChildren,
+        }],
+      });
+
+      return doc;
+    }
+
+    function downloadBlob(blob,filename){
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},200);
+    }
+    function getFileName(){return(data.fullName||'resume').trim().replace(/\s+/g,'_').toLowerCase();}
+
+    function showProgress(msg){
+      var prog=document.getElementById('download-progress');
+      var fill=document.getElementById('progress-fill');
+      var txt=document.getElementById('ad-progress');
+      var errEl=document.getElementById('download-error');
+      errEl.classList.add('hidden');
+      prog.classList.remove('hidden');
+      txt.textContent=msg;
+      return {
+        setPercent:function(p){fill.style.width=p+'%';},
+        setError:function(m){errEl.textContent=m;errEl.classList.remove('hidden');prog.classList.add('hidden');},
+        hide:function(){prog.classList.add('hidden');}
+      };
+    }
+
+    /* ── Download handler ── */
+    document.getElementById('start-download').addEventListener('click',function(){
+      var btn=document.getElementById('start-download');
+      btn.disabled=true;
+
+      if(selectedFormat==='docx'){
+        var p=showProgress('Generating Word document…');
+        p.setPercent(30);
+        try{
+          var tpl=allTemplates.find(function(x){return x.id===currentTplId;})||allTemplates[0];
+          var doc=buildDocx(data,tpl);
+          p.setPercent(60);
+          document.getElementById('ad-progress').textContent='Packing Word file…';
+          D.Packer.toBlob(doc).then(function(blob){
+            p.setPercent(90);
+            downloadBlob(blob,getFileName()+'.docx');
+            p.setPercent(100);
+            document.getElementById('ad-progress').textContent='Downloaded! Your Word file is ready.';
+            setTimeout(function(){p.hide();},2000);
+            btn.disabled=false;
+          }).catch(function(err){
+            showProgress('').setError('DOCX failed: '+err.message);
+            btn.disabled=false;
+          });
+        }catch(err){
+          showProgress('').setError('DOCX failed: '+err.message);
+          btn.disabled=false;
+        }
+        return;
+      }
+
+      /* ── PDF generation using local libraries ── */
+      var p=showProgress('Preparing PDF…');
+      p.setPercent(10);
+
+      if(typeof html2canvas==='undefined'||typeof jspdf==='undefined'){
+        p.setError('PDF libraries not loaded. Please refresh the page and try again.');
+        btn.disabled=false;
+        return;
+      }
+
+      p.setPercent(20);
+      document.getElementById('ad-progress').textContent='Rendering resume…';
+
+      var previewEl=document.getElementById('resume-preview');
+      if(!previewEl||!previewEl.innerHTML||previewEl.innerHTML.length<10){
+        p.setError('Resume content not loaded. Please refresh and try again.');
+        btn.disabled=false;
+        return;
+      }
+
+      var A4_W=794, A4_H=1123;
+      
+      var wrapper=document.createElement('div');
+      wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:'+A4_W+'px;height:'+A4_H+'px;background:#ffffff;overflow:hidden;margin:0;padding:0;';
+      
+      var allStyles=document.createElement('style');
+      allStyles.textContent=`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        html, body { 
+          width: ${A4_W}px; height: ${A4_H}px; 
+          margin: 0; padding: 0; 
+          background: #ffffff;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .rsm-doc {
+          font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+          font-size: 16px;
+          line-height: 1.6;
+          color: #1B2440;
+          width: ${A4_W}px;
+          height: ${A4_H}px;
+          overflow: hidden;
+          background: #ffffff;
+          box-sizing: border-box;
+        }
+        
+        .rsm-single { 
+          padding: 38px 44px; 
+          display: flex; 
+          flex-direction: column; 
+          height: 100%; 
+        }
+        
+        .rsm-band { padding: 0; height: 100%; display: flex; flex-direction: column; }
+        .rsm-band-top { padding: 28px 44px 20px; }
+        .rsm-band-grid { 
+          display: grid; 
+          grid-template-columns: 1.4fr 1fr; 
+          gap: 28px; 
+          padding: 24px 44px 32px; 
+          flex: 1;
+        }
+        
+        .rsm-sidebar-layout { display: flex; height: 100%; min-height: 0; }
+        .rsm-sidebar { 
+          width: 34%; 
+          padding: 32px 24px; 
+          color: white; 
+          display: flex; 
+          flex-direction: column; 
+          align-items: flex-start;
+          overflow-y: auto;
+          box-sizing: border-box;
+        }
+        .rsm-main { 
+          width: 66%; 
+          padding: 30px 30px; 
+          display: flex; 
+          flex-direction: column;
+          box-sizing: border-box;
+        }
+        
+        .rsm-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+        .rsm-photo { width: 66px; height: 66px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+        .rsm-photo-fallback { 
+          display: flex; align-items: center; justify-content: center; 
+          color: white; font-weight: 700; font-size: 24px; 
+        }
+        .rsm-name { font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+        .rsm-contact { font-size: 13px; color: #5B6B8C; margin-top: 4px; }
+        
+        .rsm-rule { border: none; border-top: 1.5px solid; margin: 16px 0 20px; }
+        .rsm-section { margin-bottom: 18px; }
+        .rsm-section-title { 
+          font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; 
+          font-weight: 700; color: #5B6B8C; margin-bottom: 10px; 
+          padding-bottom: 6px; border-bottom: 2px solid #E2E8F0;
+        }
+        .rsm-body { font-size: 15px; color: #2A3654; line-height: 1.65; }
+        
+        .rsm-item { margin-bottom: 14px; }
+        .rsm-item:last-child { margin-bottom: 0; }
+        .rsm-item-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+        .rsm-item-title { font-weight: 600; font-size: 16px; color: #1B2440; }
+        .rsm-item-meta { font-size: 13px; color: #5B6B8C; white-space: nowrap; }
+        .rsm-item-sub { font-size: 14px; color: #5B6B8C; }
+        
+        .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; }
+        .rsm-pill { 
+          font-size: 12px; padding: 4px 13px; border: 1.5px solid; 
+          border-radius: 999px; font-weight: 500; line-height: 1.4;
+        }
+        
+        .rsm-links { display: flex; flex-direction: column; gap: 6px; }
+        .rsm-link { font-size: 13px; color: #2A3654; word-break: break-all; }
+        
+        .rsm-sidebar .rsm-photo-fallback { background: rgba(255,255,255,0.2) !important; }
+        .rsm-sidebar .rsm-name-sidebar { font-size: 22px; color: white; margin-top: 14px; font-weight: 700; }
+        .rsm-sidebar .rsm-contact-sidebar { color: rgba(255,255,255,0.85); font-size: 12.5px; margin-top: 4px; }
+        .rsm-sidebar .rsm-section { margin-bottom: 16px; }
+        .rsm-sidebar .rsm-section-title { 
+          color: rgba(255,255,255,0.7); 
+          border-bottom-color: rgba(255,255,255,0.25);
+          font-size: 12px;
+        }
+        .rsm-sidebar .rsm-body, .rsm-sidebar .rsm-item-sub, .rsm-sidebar .rsm-item-meta { 
+          color: rgba(255,255,255,0.9); 
+        }
+        .rsm-sidebar .rsm-item-title { color: white; font-size: 14px; }
+        .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; }
+        .rsm-sidebar .rsm-link { color: rgba(255,255,255,0.9); }
+        .rsm-sidebar-sections { margin-top: 18px; width: 100%; }
+        
+        .font-display { font-family: 'Fraunces', Georgia, serif; }
+        .font-sans { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; }
+      `;
+      
+      wrapper.appendChild(allStyles);
+      
+      var resumeClone=previewEl.cloneNode(true);
+      resumeClone.style.cssText='width:'+A4_W+'px;height:'+A4_H+'px;box-sizing:border-box;';
+      wrapper.appendChild(resumeClone);
+      document.body.appendChild(wrapper);
+
+      document.fonts.ready.then(function(){
+        setTimeout(function(){
+          html2canvas(wrapper,{
+            scale:2,
+            useCORS:true,
+            allowTaint:true,
+            backgroundColor:'#ffffff',
+            logging:false,
+            width:A4_W,
+            height:A4_H,
+            windowWidth:A4_W,
+            windowHeight:A4_H,
+            imageTimeout:15000,
+            removeContainer:true
+          }).then(function(canvas){
+            document.body.removeChild(wrapper);
+            p.setPercent(50);
+            document.getElementById('ad-progress').textContent='Building PDF…';
+
+            var imgData=canvas.toDataURL('image/jpeg',0.98);
+            var pdf=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+            var pw=pdf.internal.pageSize.getWidth();
+            var ph=pdf.internal.pageSize.getHeight();
+            pdf.addImage(imgData,'JPEG',0,0,pw,ph,'','MEDIUM');
+            p.setPercent(80);
+            pdf.save(getFileName()+'.pdf');
+            p.setPercent(100);
+            document.getElementById('ad-progress').textContent='Downloaded! Your PDF is ready.';
+            setTimeout(function(){p.hide();},2000);
+          }).catch(function(err){
+            if(wrapper.parentNode)document.body.removeChild(wrapper);
+            console.error('PDF error:',err);
+            showProgress('').setError('PDF failed: '+err.message+'. Please try again.');
+          }).finally(function(){
+            btn.disabled=false;
+          });
+        },100);
+      });
+    });
+  })();
+  </script>
+</BaseLayout>

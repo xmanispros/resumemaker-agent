@@ -1,0 +1,91 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Contact Us | ResumeMaker Agent';
+const description = 'Get in touch with the ResumeMaker Agent team — feedback, bug reports, and questions welcome.';
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://resumemakeragent.com/contact" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/contact">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16" style="background: var(--neu-bg);">
+    <div class="neu-badge inline-block mb-4">
+      <p class="eyebrow">Get in touch</p>
+    </div>
+    <h1 class="text-4xl font-semibold" style="color: var(--neu-text);">Contact Us</h1>
+    <p class="mt-3" style="color: var(--neu-text-dim);">
+      Found a bug, have a template idea, or just want to say hi? Send us a message below.
+    </p>
+
+    <div class="neu-card mt-8 p-6 sm:p-8">
+      <form id="contact-form" class="space-y-5">
+        <div>
+          <label class="label-text" for="name">Your name</label>
+          <input id="name" name="name" class="neu-input" type="text" placeholder="Jane Doe" required />
+        </div>
+        <div>
+          <label class="label-text" for="email">Your email</label>
+          <input id="email" name="email" class="neu-input" type="email" placeholder="you@example.com" required />
+        </div>
+        <div>
+          <label class="label-text" for="subject">Subject</label>
+          <select id="subject" name="subject" class="neu-select">
+            <option>General question</option>
+            <option>Bug report</option>
+            <option>Template suggestion</option>
+            <option>Advertising / partnership</option>
+          </select>
+        </div>
+        <div>
+          <label class="label-text" for="message">Message</label>
+          <textarea id="message" name="message" class="neu-textarea" rows="5" placeholder="Tell us what's on your mind..." required></textarea>
+        </div>
+        <button type="submit" class="neu-btn-primary w-full justify-center">Send Message</button>
+        <p id="contact-status" class="hidden text-center text-sm text-teal"></p>
+      </form>
+    </div>
+
+    <div class="mt-8 grid gap-4 sm:grid-cols-2">
+      <div class="neu-card p-5">
+        <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff;">
+          <span class="text-teal">@</span>
+        </div>
+        <p class="text-sm font-semibold" style="color: var(--neu-text);">Support email</p>
+        <p class="mt-1 text-sm" style="color: var(--neu-text-dim);">support@resumemakeragent.example.com</p>
+      </div>
+      <div class="neu-card p-5">
+        <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff;">
+          <span class="text-teal">⏱</span>
+        </div>
+        <p class="text-sm font-semibold" style="color: var(--neu-text);">Response time</p>
+        <p class="mt-1 text-sm" style="color: var(--neu-text-dim);">We typically reply within 2–3 business days.</p>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const form = document.getElementById('contact-form');
+      const status = document.getElementById('contact-status');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const subject = document.getElementById('subject').value;
+        const message = document.getElementById('message').value;
+        const body = encodeURIComponent(`From: ${name} (${email})\n\n${message}`);
+        const mailto = `mailto:support@resumemakeragent.example.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+        window.location.href = mailto;
+        status.textContent = "Opening your email app to send this message…";
+        status.classList.remove('hidden');
+      });
+    })();
+  </script>
+</BaseLayout>

@@ -1,0 +1,227 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { templates, categories } from '../lib/templates';
+
+const title = 'Resume Templates — 90+ Free Designs | ResumeMaker Agent';
+const description =
+  'Choose from 90+ free resume templates: Modern, Professional, Creative, Simple and ATS-Friendly. Preview instantly with sample data, switch anytime without losing your data.';
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "Templates", "item": "https://resumemakeragent.com/templates" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/templates">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <section class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16" style="background: var(--neu-bg);">
+    <div class="neu-badge inline-block mb-4">
+      <p class="eyebrow">Templates</p>
+    </div>
+    <h1 class="text-4xl font-semibold" style="color: var(--neu-text);">{templates.length}+ free resume formats.</h1>
+    <p class="mt-3 max-w-xl" style="color: var(--neu-text-dim);">
+      Pick a starting point — every thumbnail shows sample data so you can see exactly how your resume
+      will look. You can switch templates later in the builder and your details will carry over.
+    </p>
+
+    <div class="mt-8">
+      <div class="neu-tab-bar" id="filter-bar">
+        <button data-filter="All" class="neu-tab active">All</button>
+        {categories.map((c) => (
+          <button data-filter={c} class="neu-tab">{c}</button>
+        ))}
+      </div>
+    </div>
+
+    <div id="template-grid" class="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+      {templates.map((t) => (
+        <a
+          href={`/builder?template=${t.id}`}
+          class="template-card group block"
+          data-category={t.category}
+        >
+          <div class="rsm-frame relative" style="transition: all 0.3s ease; background: #fff;">
+            {(t.layout === 'sidebar-left' || t.layout === 'sidebar-right') && (
+              <div class:list={['absolute inset-0 flex text-left', t.layout === 'sidebar-right' && 'flex-row-reverse']}>
+                <div class="flex w-[36%] flex-col px-1.5 py-2 text-left overflow-hidden" style={{ background: t.surface }}>
+                  <div class="h-5 w-5 rounded-full bg-white/25 flex items-center justify-center text-[6px] font-bold text-white mx-auto">
+                    {t.sample.name.split(' ').map((w) => w[0]).join('')}
+                  </div>
+                  <p class="text-[5.5px] font-semibold leading-tight text-white text-center mt-0.5">{t.sample.name}</p>
+                  <p class="text-[4px] leading-tight text-white/70 text-center">{t.sample.role}</p>
+                  <p class="text-[3px] text-white/50 text-center mt-0.5">{t.sample.contact}</p>
+                  <div class="mt-1 border-t border-white/20 pt-0.5">
+                    <p class="text-[3.5px] font-bold text-white/60 uppercase tracking-wider mb-[1px]">Skills</p>
+                    <div class="flex flex-wrap gap-[1px]">
+                      {t.sample.skills.map((s) => (
+                        <span class="rounded-full border border-white/30 px-[3px] py-[0.5px] text-[3px] text-white/80">{s}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div class="mt-0.5 border-t border-white/20 pt-0.5">
+                    <p class="text-[3.5px] font-bold text-white/60 uppercase tracking-wider mb-[1px]">Education</p>
+                    <p class="text-[3px] text-white/80 font-semibold leading-tight">MBA — Product Mgmt</p>
+                    <p class="text-[2.5px] text-white/50 leading-tight">Indian School of Business</p>
+                    <p class="text-[2.5px] text-white/40 leading-tight">2022 – 2024</p>
+                  </div>
+                  <div class="mt-0.5 border-t border-white/20 pt-0.5">
+                    <p class="text-[3.5px] font-bold text-white/60 uppercase tracking-wider mb-[1px]">Links</p>
+                    <p class="text-[2.5px] text-white/60 leading-tight">linkedin.com/in/alex</p>
+                  </div>
+                </div>
+                <div class="flex-1 p-1.5 flex flex-col overflow-hidden">
+                  <div class="h-0.5 w-6 rounded-sm" style={{ background: t.accent }}></div>
+                  <div class="mt-1">
+                    <p class="text-[3.5px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Summary</p>
+                    <p class="text-[2.5px] leading-[1.4] text-gray-500 line-clamp-3">Detail-oriented MBA graduate with 3+ years of experience in product strategy and business analytics.</p>
+                  </div>
+                  <div class="mt-1">
+                    <p class="text-[3.5px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Experience</p>
+                    <div class="flex justify-between items-baseline">
+                      <p class="text-[3px] font-semibold text-gray-700 leading-tight">Associate Product Manager</p>
+                      <p class="text-[2.5px] text-gray-400">2024</p>
+                    </div>
+                    <p class="text-[2.5px] text-gray-400 leading-tight">Freshworks</p>
+                    <p class="text-[2.5px] text-gray-400 leading-tight mt-[1px] line-clamp-2">Led redesign of onboarding flow, increasing activation rate by 18%.</p>
+                  </div>
+                  <div class="mt-1">
+                    <p class="text-[3.5px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Projects</p>
+                    <p class="text-[3px] font-semibold text-gray-700 leading-tight">ResumeMaker Agent</p>
+                    <p class="text-[2.5px] text-gray-400 leading-tight line-clamp-1">AI-guided resume builder with live preview and free PDF download.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {t.layout === 'header-band' && (
+              <div class="absolute inset-0 flex flex-col">
+                <div class="flex items-center gap-1 px-2 py-1" style={{ background: t.surface }}>
+                  <div class="h-4 w-4 rounded-full flex items-center justify-center text-[5px] font-bold text-white" style={{ background: 'rgba(255,255,255,0.25)' }}>
+                    {t.sample.name.split(' ').map((w) => w[0]).join('')}
+                  </div>
+                  <div>
+                    <p class="text-[5.5px] font-semibold leading-tight text-white">{t.sample.name}</p>
+                    <p class="text-[4px] leading-tight text-white/70">{t.sample.role}</p>
+                  </div>
+                </div>
+                <div class="flex-1 flex p-1.5 gap-1 overflow-hidden">
+                  <div class="flex-[1.4] flex flex-col">
+                    <div class="h-0.5 w-5 rounded-sm" style={{ background: t.accent }}></div>
+                    <div class="mt-1">
+                      <p class="text-[3px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Summary</p>
+                      <p class="text-[2.5px] leading-[1.4] text-gray-500 line-clamp-2">Detail-oriented MBA graduate with 3+ years of experience in product strategy.</p>
+                    </div>
+                    <div class="mt-1">
+                      <p class="text-[3px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Experience</p>
+                      <p class="text-[2.5px] font-semibold text-gray-700 leading-tight">Assoc. Product Manager</p>
+                      <p class="text-[2.5px] text-gray-400 leading-tight">Freshworks · 2024</p>
+                    </div>
+                  </div>
+                  <div class="flex-1 flex flex-col">
+                    <p class="text-[3px] font-bold text-gray-400 uppercase tracking-wider mb-[1px]">Skills</p>
+                    <div class="flex flex-wrap gap-[1px]">
+                      {t.sample.skills.map((s) => (
+                        <span class="rounded-full px-[3px] py-[0.5px] text-[2.5px] font-medium" style={{ background: `${t.surface}15`, color: t.accent }}>{s}</span>
+                      ))}
+                    </div>
+                    <p class="text-[3px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 mb-[1px]">Education</p>
+                    <p class="text-[2.5px] font-semibold text-gray-700 leading-tight">MBA — Product Mgmt</p>
+                    <p class="text-[2.5px] text-gray-400 leading-tight">ISB, 2022 – 2024</p>
+                    <p class="text-[3px] font-bold text-gray-400 uppercase tracking-wider mt-0.5 mb-[1px]">Links</p>
+                    <p class="text-[2.5px] text-gray-400 leading-tight">linkedin.com/in/alex</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {t.category === 'ATS-Friendly' ? (
+              <div class="absolute inset-0 p-1.5 flex flex-col">
+                <div class="text-center mb-0.5">
+                  <p class="text-[6px] font-bold" style="color: #1B2440;">{t.sample.name}</p>
+                  <p class="text-[3.5px]" style="color: #5B6B8C;">{t.sample.role} • {t.sample.contact}</p>
+                </div>
+                <div class="h-px w-full mb-0.5" style={{ background: '#E2E8F0' }}></div>
+                <p class="text-[3px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>
+                <p class="text-[2.5px] leading-[1.4] text-gray-500 line-clamp-2 mb-0.5">Detail-oriented MBA graduate with 3+ years of experience in product strategy and business analytics.</p>
+                <p class="text-[3px] font-bold text-gray-400 uppercase mb-[1px]">Experience</p>
+                <p class="text-[2.5px] font-semibold text-gray-700">Assoc. Product Manager — Freshworks</p>
+                <p class="text-[2.5px] text-gray-400 mb-0.5">Led redesign of onboarding flow, increasing activation rate by 18%.</p>
+                <p class="text-[3px] font-bold text-gray-400 uppercase mb-[1px]">Skills</p>
+                <p class="text-[2.5px] font-medium" style={{ color: t.accent }}>{t.sample.skills.join(' • ')}</p>
+                <p class="text-[3px] font-bold text-gray-400 uppercase mt-0.5 mb-[1px]">Education</p>
+                <p class="text-[2.5px] font-semibold text-gray-700">MBA — Product Mgmt, ISB</p>
+                <p class="text-[2.5px] text-gray-400">2022 – 2024</p>
+              </div>
+            ) : t.layout === 'single-column' && (
+              <div class="absolute inset-0 p-1.5 flex flex-col">
+                <div class="flex items-center gap-1">
+                  <div class="h-5 w-5 rounded-full flex items-center justify-center text-[6px] font-bold text-white flex-shrink-0" style={{ background: t.accent }}>
+                    {t.sample.name.split(' ').map((w) => w[0]).join('')}
+                  </div>
+                  <div>
+                    <p class="text-[5.5px] font-semibold leading-tight" style="color: #1B2440;">{t.sample.name}</p>
+                    <p class="text-[4px] leading-tight" style="color: #5B6B8C;">{t.sample.role}</p>
+                    <p class="text-[3px] leading-tight" style="color: #8A94A6;">{t.sample.contact}</p>
+                  </div>
+                </div>
+                <div class="mt-0.5 h-px w-full" style={{ background: `${t.accent}40` }}></div>
+                <div class="mt-0.5">
+                  <p class="text-[3px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Summary</p>
+                  <p class="text-[2.5px] leading-[1.4] text-gray-500 line-clamp-2">Detail-oriented MBA graduate with 3+ years of experience in product strategy and business analytics.</p>
+                </div>
+                <div class="mt-0.5">
+                  <p class="text-[3px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Experience</p>
+                  <div class="flex justify-between items-baseline">
+                    <p class="text-[2.5px] font-semibold text-gray-700 leading-tight">Assoc. Product Manager</p>
+                    <p class="text-[2.5px] text-gray-400">2024</p>
+                  </div>
+                  <p class="text-[2.5px] text-gray-400 leading-tight">Freshworks</p>
+                </div>
+                <div class="mt-0.5">
+                  <p class="text-[3px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Skills</p>
+                  <div class="flex flex-wrap gap-[1px]">
+                    {t.sample.skills.map((s) => (
+                      <span class="rounded-full border px-[3px] py-[0.5px] text-[2.5px] font-medium" style={{ borderColor: `${t.accent}50`, color: t.accent }}>{s}</span>
+                    ))}
+                  </div>
+                </div>
+                <div class="mt-0.5">
+                  <p class="text-[3px] font-bold uppercase tracking-wider mb-[1px]" style={{ color: t.accent }}>Education</p>
+                  <p class="text-[2.5px] font-semibold text-gray-700 leading-tight">MBA — Product Mgmt</p>
+                  <p class="text-[2.5px] text-gray-400 leading-tight">ISB, 2022 – 2024</p>
+                </div>
+              </div>
+            )}
+
+            <div class="absolute inset-0 flex items-center justify-center opacity-0 transition-all duration-300 group-hover:opacity-100" style="background: rgba(0,0,0,0.25); border-radius: 20px;">
+              <span class="neu-btn-primary !px-4 !py-2 text-xs !rounded-xl">Use Template</span>
+            </div>
+          </div>
+          <p class="mt-3 text-sm font-medium" style="color: var(--neu-text);">{t.name}</p>
+          <p class="text-xs" style="color: var(--neu-text-dim);">{t.category}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <script is:inline>
+    (function () {
+      const buttons = document.querySelectorAll('.neu-tab');
+      const cards = document.querySelectorAll('.template-card');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          buttons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.getAttribute('data-filter');
+          cards.forEach((card) => {
+            const show = filter === 'All' || card.getAttribute('data-category') === filter;
+            card.classList.toggle('hidden', !show);
+          });
+        });
+      });
+    })();
+  </script>
+</BaseLayout>

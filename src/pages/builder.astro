@@ -1,0 +1,415 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { templates } from '../lib/templates';
+
+const title = 'Resume Builder — Free Agent-Guided Resume Maker | ResumeMaker Agent';
+const description = 'Build your resume with an AI-guided agent. Live preview, multiple templates, free download.';
+
+const templatesJson = JSON.stringify(
+  templates.map((t) => ({
+    id: t.id, name: t.name, accent: t.accent, surface: t.surface,
+    category: t.category, layout: t.layout, font: t.font,
+  }))
+);
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "Builder", "item": "https://resumemakeragent.com/builder" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/builder">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8" style="background: var(--neu-bg);">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-6">
+      <div>
+        <div class="neu-badge inline-block mb-2">
+          <p class="eyebrow">Resume Builder</p>
+        </div>
+        <h1 class="text-xl font-semibold sm:text-2xl lg:text-3xl" style="color: var(--neu-text);">Let's build your resume.</h1>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <select id="template-select" class="neu-select !w-auto !py-2 text-xs sm:text-sm"></select>
+        <button id="mobile-preview-toggle" class="neu-btn-sm lg:hidden text-xs sm:text-sm">Preview</button>
+        <a href="/download" id="download-link" class="neu-btn-primary !px-3 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:text-sm">Download</a>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1fr_1fr] lg:items-start">
+      <!-- FORM COLUMN -->
+      <div id="form-column" class="space-y-3 sm:space-y-4">
+        <!-- Agent message -->
+        <div class="neu-notification" style="border-left: 3px solid #2196F3;">
+          <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl text-white font-mono text-xs sm:h-9 sm:w-9" style="background: linear-gradient(145deg, #2ba4f0, #1a8fe0);">AI</span>
+          <p class="text-xs sm:text-sm" style="color: var(--neu-text-muted);">Edit any field below — the preview updates live. Sample data is pre-filled.</p>
+        </div>
+
+        <!-- Basic Info -->
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
+          <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Basic Information</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="label-text" for="fullName">Full name *</label>
+              <input id="fullName" class="neu-input" type="text" placeholder="Manish Kumar" />
+            </div>
+            <div>
+              <label class="label-text" for="photo">Profile image</label>
+              <input id="photo" class="neu-input" type="file" accept="image/*" />
+            </div>
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="label-text">Contact type</label>
+              <div class="flex gap-2">
+                <button type="button" data-contact-type="email" class="contact-toggle is-active">Email</button>
+                <button type="button" data-contact-type="mobile" class="contact-toggle">Mobile</button>
+              </div>
+            </div>
+            <div>
+              <label class="label-text" for="contactValue">Contact detail *</label>
+              <input id="contactValue" class="neu-input" type="text" placeholder="you@example.com" />
+            </div>
+          </div>
+          <div>
+            <label class="label-text" for="location">Location</label>
+            <input id="location" class="neu-input" type="text" placeholder="Bengaluru, India" />
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="neu-card space-y-3 p-5">
+          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Professional Summary</h2>
+          <textarea id="summary" class="neu-textarea" rows="3" placeholder="A short professional summary..."></textarea>
+        </div>
+
+        <!-- Skills -->
+        <div class="neu-card space-y-3 p-5">
+          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Skills</h2>
+          <div class="flex gap-2">
+            <input id="skill-input" class="neu-input flex-1" type="text" placeholder="e.g. Product Strategy" />
+            <button id="skill-add" type="button" class="neu-btn-sm">Add</button>
+          </div>
+          <div id="skill-list" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Education -->
+        <div class="neu-card space-y-3 p-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Education</h2>
+            <button data-add="education" type="button" class="neu-btn-sm text-teal">+ Add</button>
+          </div>
+          <div id="education-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Experience -->
+        <div class="neu-card space-y-3 p-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Experience</h2>
+            <button data-add="experience" type="button" class="neu-btn-sm text-teal">+ Add</button>
+          </div>
+          <div id="experience-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Projects -->
+        <div class="neu-card space-y-3 p-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Projects</h2>
+            <button data-add="projects" type="button" class="neu-btn-sm text-teal">+ Add</button>
+          </div>
+          <div id="projects-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Links -->
+        <div class="neu-card space-y-3 p-5">
+          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Social Links</h2>
+          <div class="flex gap-2">
+            <input id="link-input" class="neu-input flex-1" type="text" placeholder="linkedin.com/in/you" />
+            <button id="link-add" type="button" class="neu-btn-sm">Add</button>
+          </div>
+          <div id="link-list" class="space-y-2"></div>
+        </div>
+
+        <!-- Template swatches -->
+        <div class="neu-card space-y-3 p-5">
+          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Choose Template</h2>
+          <div id="template-swatches" class="grid grid-cols-5 gap-3 sm:grid-cols-6"></div>
+        </div>
+      </div>
+
+      <!-- PREVIEW COLUMN -->
+      <div id="preview-column" class="hidden lg:block">
+        <div class="sticky top-24">
+          <div class="mb-3 flex items-center justify-between">
+            <div class="neu-badge inline-block">
+              <p class="eyebrow">Live Preview</p>
+            </div>
+          </div>
+          <div class="rsm-frame mx-auto max-w-md">
+            <div id="resume-preview"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ templatesJson }}>
+  (function () {
+    var allTemplates = JSON.parse(templatesJson);
+    var urlTemplate = new URLSearchParams(location.search).get('template');
+    var STORAGE_KEY = 'rma-resume-data';
+    var TEMPLATE_KEY = 'rma-selected-template';
+
+    function defaultData() {
+      return {
+        fullName: 'Manish Kumar', photo: '', contactType: 'email',
+        contactValue: 'manish.kumar@email.com', location: 'Hyderabad, India',
+        summary: 'Detail-oriented MBA graduate with 3+ years of experience in product strategy and business analytics. Skilled in stakeholder management, data-driven decision making, and cross-functional team leadership. Passionate about building products that solve real user problems.',
+        skills: ['Product Strategy','Data Analysis','SQL','Excel','Stakeholder Management','Agile / Scrum','JIRA','Wireframing'],
+        education: [
+          { degree: 'MBA — Product Management', school: 'Indian School of Business', year: '2022 – 2024' },
+          { degree: 'B.Tech — Computer Science', school: 'JNTU Hyderabad', year: '2017 – 2021' }
+        ],
+        experience: [
+          { role: 'Associate Product Manager', company: 'Freshworks', duration: '2024 – Present', description: 'Led the redesign of the onboarding flow for SaaS customers, increasing activation rate by 18%. Collaborated with engineering, design, and marketing teams to ship features on a 2-week sprint cycle.' },
+          { role: 'Product Analyst Intern', company: 'Infosys', duration: '2023 – 2024', description: 'Built dashboards tracking KPIs for 12 enterprise clients using SQL and Tableau. Presented monthly insights to senior leadership that informed roadmap priorities.' }
+        ],
+        projects: [
+          { name: 'ResumeMaker Agent', description: 'Built an AI-guided resume builder with live preview, multiple templates, and free PDF download — serving 10K+ users monthly.' },
+          { name: 'SmartDash — Expense Tracker', description: 'Developed a personal finance web app with React and Node.js featuring OCR receipt scanning and automated category tagging.' }
+        ],
+        links: ['linkedin.com/in/manishkumar', 'github.com/manishkumar']
+      };
+    }
+
+    function loadData() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { var s = JSON.parse(raw); if (s.fullName && s.fullName.trim()) return Object.assign(defaultData(), s); }
+      } catch (e) {}
+      return defaultData();
+    }
+
+    function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+    function loadTemplate(fb) { return localStorage.getItem(TEMPLATE_KEY) || fb; }
+    function saveTemplate(id) { localStorage.setItem(TEMPLATE_KEY, id); }
+
+    function esc(s) { if (!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function ini(n) { if (!n) return '?'; return n.trim().split(/\s+/).slice(0,2).map(function(w){return w[0]?w[0].toUpperCase():'';}).join(''); }
+    function contactLine(d) { var b=[]; if(d.contactValue)b.push(esc(d.contactValue)); if(d.location)b.push(esc(d.location)); return b.join('  •  '); }
+    function sec(title, html) { if(!html)return ''; return '<div class="rsm-section"><h3 class="rsm-section-title">'+esc(title)+'</h3>'+html+'</div>'; }
+    function lst(items,fn) { var v=(items||[]).filter(function(i){return i&&Object.values(i).some(Boolean);}); if(!v.length)return ''; return v.map(fn).join(''); }
+
+    function buildHTML(d, t) {
+      var ac=t.accent, sf=t.surface, fc=t.font==='display'?'font-display':'font-sans';
+      var name=esc(d.fullName)||'Your Name';
+      var photo=d.photo?'<img src="'+d.photo+'" alt="'+esc(d.fullName)+'" class="rsm-photo"/>':'<div class="rsm-photo rsm-photo-fallback" style="background:'+ac+'">'+ini(d.fullName)+'</div>';
+      var summ=d.summary?'<p class="rsm-body">'+esc(d.summary)+'</p>':'';
+      var skills='';
+      if(d.skills&&d.skills.length){skills='<div class="rsm-skills">'+d.skills.filter(Boolean).map(function(s){return '<span class="rsm-pill" style="border-color:'+ac+';color:'+ac+'">'+esc(s)+'</span>';}).join('')+'</div>';}
+      var edu=lst(d.education,function(e){return '<div class="rsm-item"><div class="rsm-item-head"><span class="rsm-item-title">'+esc(e.degree)+'</span><span class="rsm-item-meta">'+esc(e.year)+'</span></div><div class="rsm-item-sub">'+esc(e.school)+'</div></div>';});
+      var exp=lst(d.experience,function(e){return '<div class="rsm-item"><div class="rsm-item-head"><span class="rsm-item-title">'+esc(e.role)+'</span><span class="rsm-item-meta">'+esc(e.duration)+'</span></div><div class="rsm-item-sub">'+esc(e.company)+'</div>'+(e.description?'<p class="rsm-body" style="margin-top:4px">'+esc(e.description)+'</p>':'')+'</div>';});
+      var proj=lst(d.projects,function(p){return '<div class="rsm-item"><div class="rsm-item-head"><span class="rsm-item-title">'+esc(p.name)+'</span></div>'+(p.description?'<p class="rsm-body" style="margin-top:4px">'+esc(p.description)+'</p>':'')+'</div>';});
+      var links='';
+      if(d.links&&d.links.length){links='<div class="rsm-links">'+d.links.filter(Boolean).map(function(l){return '<span class="rsm-link">'+esc(l)+'</span>';}).join('')+'</div>';}
+      var hdr='<div class="rsm-header">'+photo+'<div><h1 class="rsm-name '+fc+'">'+name+'</h1><p class="rsm-contact">'+contactLine(d)+'</p></div></div>';
+      var side=sec('Skills',skills)+sec('Education',edu)+sec('Links',links);
+      var main=sec('Summary',summ)+sec('Experience',exp)+sec('Projects',proj);
+      if(t.layout==='single-column')return '<div class="rsm-doc rsm-single '+fc+'">'+hdr+'<hr class="rsm-rule" style="border-color:'+ac+'33"/>'+main+sec('Skills',skills)+sec('Education',edu)+sec('Links',links)+'</div>';
+      if(t.layout==='header-band')return '<div class="rsm-doc rsm-band '+fc+'"><div class="rsm-band-top" style="background:'+sf+'1A">'+hdr+'</div><div class="rsm-band-grid"><div>'+main+'</div><div>'+side+'</div></div></div>';
+      var sf2=t.layout==='sidebar-left';
+      var sp='<div class="rsm-sidebar" style="background:'+sf+'">'+photo+'<h1 class="rsm-name rsm-name-sidebar '+fc+'">'+name+'</h1><p class="rsm-contact rsm-contact-sidebar">'+contactLine(d)+'</p><div class="rsm-sidebar-sections">'+sec('Skills',skills)+sec('Education',edu)+sec('Links',links)+'</div></div>';
+      var mp='<div class="rsm-main">'+main+'</div>';
+      return '<div class="rsm-doc rsm-sidebar-layout '+fc+'" style="flex-direction:'+(sf2?'row':'row-reverse')+'">'+sp+mp+'</div>';
+    }
+
+    /* State */
+    var data = loadData();
+    var tplId = loadTemplate(urlTemplate || allTemplates[0].id);
+    if (urlTemplate) { saveTemplate(urlTemplate); tplId = urlTemplate; }
+    function persist() { saveData(data); }
+    function render() {
+      persist();
+      var t = allTemplates.find(function(x){return x.id===tplId;})||allTemplates[0];
+      document.getElementById('resume-preview').innerHTML = buildHTML(data, t);
+    }
+
+    /* Basic fields */
+    var fullNameEl=document.getElementById('fullName'), photoEl=document.getElementById('photo'),
+        contactEl=document.getElementById('contactValue'), locationEl=document.getElementById('location');
+    fullNameEl.value=data.fullName; contactEl.value=data.contactValue; locationEl.value=data.location;
+    fullNameEl.addEventListener('input',function(){data.fullName=fullNameEl.value;render();});
+    contactEl.addEventListener('input',function(){data.contactValue=contactEl.value;render();});
+    locationEl.addEventListener('input',function(){data.location=locationEl.value;render();});
+
+    document.querySelectorAll('.contact-toggle').forEach(function(btn){
+      if(btn.dataset.contactType===data.contactType)btn.classList.add('is-active');
+      btn.addEventListener('click',function(){
+        document.querySelectorAll('.contact-toggle').forEach(function(b){b.classList.remove('is-active');});
+        btn.classList.add('is-active'); data.contactType=btn.dataset.contactType;
+        contactEl.placeholder=data.contactType==='email'?'you@example.com':'+91 98765 43210'; render();
+      });
+    });
+
+    photoEl.addEventListener('change',function(){
+      var f=photoEl.files&&photoEl.files[0];if(!f)return;
+      var r=new FileReader();r.onload=function(){data.photo=r.result;render();};r.readAsDataURL(f);
+    });
+
+    /* Summary */
+    var summaryEl=document.getElementById('summary');
+    summaryEl.value=data.summary;
+    summaryEl.addEventListener('input',function(){data.summary=summaryEl.value;render();});
+
+    /* Skills */
+    function renderSkills(){
+      var el=document.getElementById('skill-list');el.innerHTML='';
+      data.skills.forEach(function(s,i){
+        var pill=document.createElement('span');pill.className='skill-pill';
+        pill.innerHTML=esc(s)+' <button aria-label="Remove" data-i="'+i+'" class="ml-1 opacity-60 hover:opacity-100">&times;</button>';
+        pill.querySelector('button').addEventListener('click',function(){data.skills.splice(i,1);renderSkills();render();});
+        el.appendChild(pill);
+      });
+    }
+    document.getElementById('skill-add').addEventListener('click',function(){
+      var inp=document.getElementById('skill-input');
+      if(inp.value.trim()){data.skills.push(inp.value.trim());inp.value='';renderSkills();render();}
+    });
+    document.getElementById('skill-input').addEventListener('keydown',function(e){
+      if(e.key==='Enter'){e.preventDefault();document.getElementById('skill-add').click();}
+    });
+    renderSkills();
+
+    /* Links */
+    function renderLinks(){
+      var el=document.getElementById('link-list');el.innerHTML='';
+      data.links.forEach(function(l,i){
+        var row=document.createElement('div');
+        row.className='neu-list-item';
+        row.innerHTML='<span class="truncate text-ink-700 text-sm">'+esc(l)+'</span><button data-i="'+i+'" class="text-ink-400 hover:text-red-500 text-sm">&times;</button>';
+        row.querySelector('button').addEventListener('click',function(){data.links.splice(i,1);renderLinks();render();});
+        el.appendChild(row);
+      });
+    }
+    document.getElementById('link-add').addEventListener('click',function(){
+      var inp=document.getElementById('link-input');
+      if(inp.value.trim()){data.links.push(inp.value.trim());inp.value='';renderLinks();render();}
+    });
+    renderLinks();
+
+    /* Repeat sections */
+    var fieldDefs={
+      education:[{key:'degree',ph:'Degree / Course'},{key:'school',ph:'School / University'},{key:'year',ph:'Year'}],
+      experience:[{key:'role',ph:'Job title'},{key:'company',ph:'Company'},{key:'duration',ph:'Duration (e.g. 2022–2024)'},{key:'description',ph:'What did you do?',area:true}],
+      projects:[{key:'name',ph:'Project name'},{key:'description',ph:'Short description',area:true}]
+    };
+
+    function renderRepeat(sec){
+      var c=document.getElementById(sec+'-list');c.innerHTML='';
+      data[sec].forEach(function(item,i){
+        var card=document.createElement('div');card.className='repeat-card';
+        fieldDefs[sec].forEach(function(f){
+          var el=document.createElement(f.area?'textarea':'input');
+          el.className='neu-input';if(!f.area)el.type='text';else el.rows=2;
+          if(f.area){el.className='neu-textarea';}
+          el.placeholder=f.ph;el.value=item[f.key]||'';
+          el.addEventListener('input',function(){item[f.key]=el.value;render();});
+          card.appendChild(el);
+        });
+        var rm=document.createElement('button');rm.type='button';
+        rm.className='neu-btn-sm text-xs text-ink-400 hover:text-red-500 mt-2';rm.textContent='Remove';
+        rm.addEventListener('click',function(){data[sec].splice(i,1);renderRepeat(sec);render();});
+        card.appendChild(rm);c.appendChild(card);
+      });
+    }
+    ['education','experience','projects'].forEach(renderRepeat);
+    document.querySelectorAll('[data-add]').forEach(function(btn){
+      btn.addEventListener('click',function(){var sec=btn.dataset.add;data[sec].push({});renderRepeat(sec);render();});
+    });
+
+    /* Templates */
+    var selectEl=document.getElementById('template-select');
+    allTemplates.forEach(function(t){var o=document.createElement('option');o.value=t.id;o.textContent=t.name+' ('+t.category+')';selectEl.appendChild(o);});
+    selectEl.value=tplId;
+    selectEl.addEventListener('change',function(){tplId=selectEl.value;saveTemplate(tplId);renderSwatches();render();});
+
+    function renderSwatches(){
+      var w=document.getElementById('template-swatches');w.innerHTML='';
+      var SAMPLES=[
+        {name:'Alex Carter',role:'Product Designer',contact:'alex@email.com'},
+        {name:'Priya Sharma',role:'Marketing Manager',contact:'priya@email.com'},
+        {name:'Rohan Verma',role:'Software Engineer',contact:'rohan@email.com'},
+        {name:'Sara Khan',role:'Business Analyst',contact:'sara@email.com'},
+        {name:'Manish Kumar',role:'MBA Candidate',contact:'manish@email.com'},
+      ];
+      allTemplates.forEach(function(t,ti){
+        var sw=document.createElement('div');
+        sw.className='cursor-pointer rounded-xl p-1 transition-all duration-200'+(t.id===tplId?' is-active':'');
+        sw.style.background='var(--neu-bg)';
+        sw.style.boxShadow=t.id===tplId
+          ?'inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light)'
+          :'2px 2px 4px var(--neu-dark), -2px -2px 4px var(--neu-light)';
+        sw.title=t.name;
+        var s=SAMPLES[ti%SAMPLES.length];
+        var ini=s.name.split(' ').map(function(w){return w[0];}).join('');
+        var mini='';
+        if(t.layout==='sidebar-left'||t.layout==='sidebar-right'){
+          mini='<div class="w-full aspect-[210/297] rounded-lg overflow-hidden flex" style="background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+            +'<div class="w-[36%] flex flex-col items-center justify-center gap-[1px] px-[2px]" style="background:'+t.surface+'">'
+            +'<div class="w-[10px] h-[10px] rounded-full bg-white/25 flex items-center justify-center text-[4px] font-bold text-white">'+ini+'</div>'
+            +'<p class="text-[4px] font-semibold text-white leading-tight text-center">'+s.name.split(' ')[0]+'</p>'
+            +'<p class="text-[3px] text-white/70 leading-tight text-center">'+s.role.split(' ')[0]+'</p>'
+            +'</div>'
+            +'<div class="flex-1 p-[3px] flex flex-col">'
+            +'<div class="h-[1.5px] w-[20px] rounded-sm mb-[2px]" style="background:'+t.accent+'"></div>'
+            +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>'
+            +'<div class="space-y-[1px]"><div class="h-[1.5px] w-full rounded bg-gray-200"></div><div class="h-[1.5px] w-3/4 rounded bg-gray-200"></div></div>'
+            +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Experience</p>'
+            +'<div class="h-[1.5px] w-2/3 rounded mb-[1px]" style="background:'+t.accent+'20"></div>'
+            +'<div class="h-[1.5px] w-full rounded bg-gray-200"></div>'
+            +'</div></div>';
+        }else if(t.layout==='header-band'){
+          mini='<div class="w-full aspect-[210/297] rounded-lg overflow-hidden flex flex-col" style="background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+            +'<div class="flex items-center gap-[2px] px-[3px] py-[2px]" style="background:'+t.surface+'">'
+            +'<div class="w-[8px] h-[8px] rounded-full bg-white/25 flex items-center justify-center text-[3px] font-bold text-white">'+ini+'</div>'
+            +'<div><p class="text-[4px] font-semibold text-white leading-tight">'+s.name.split(' ')[0]+'</p>'
+            +'<p class="text-[3px] text-white/70 leading-tight">'+s.role.split(' ')[0]+'</p></div></div>'
+            +'<div class="flex-1 p-[3px] flex gap-[2px]">'
+            +'<div class="flex-[1.4]"><div class="h-[1.5px] w-[16px] rounded-sm mb-[2px]" style="background:'+t.accent+'"></div>'
+            +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>'
+            +'<div class="space-y-[1px]"><div class="h-[1.5px] w-full rounded bg-gray-200"></div><div class="h-[1.5px] w-3/4 rounded bg-gray-200"></div></div></div>'
+            +'<div class="flex-1"><p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Skills</p>'
+            +'<div class="flex flex-wrap gap-[0.5px]">'+s.skills.map(function(sk){return '<span class="text-[2px] px-[2px] rounded" style="color:'+t.accent+'">'+sk+'</span>';}).join('')+'</div></div>'
+            +'</div></div>';
+        }else{
+          mini='<div class="w-full aspect-[210/297] rounded-lg overflow-hidden p-[3px] flex flex-col" style="background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+            +'<div class="flex items-center gap-[2px]">'
+            +'<div class="w-[10px] h-[10px] rounded-full flex items-center justify-center text-[4px] font-bold text-white flex-shrink-0" style="background:'+t.accent+'">'+ini+'</div>'
+            +'<div><p class="text-[4px] font-semibold text-gray-800 leading-tight">'+s.name.split(' ')[0]+'</p>'
+            +'<p class="text-[3px] text-gray-400 leading-tight">'+s.role.split(' ')[0]+'</p></div></div>'
+            +'<div class="h-px w-full my-[2px]" style="background:'+t.accent+'40"></div>'
+            +'<p class="text-[2.5px] font-bold text-gray-400 uppercase mb-[1px]">Summary</p>'
+            +'<div class="space-y-[1px]"><div class="h-[1.5px] w-full rounded bg-gray-200"></div><div class="h-[1.5px] w-3/4 rounded bg-gray-200"></div></div>'
+            +'<p class="text-[2.5px] font-bold uppercase mt-[2px] mb-[1px]" style="color:'+t.accent+'">Skills</p>'
+            +'<div class="flex flex-wrap gap-[0.5px]">'+s.skills.map(function(sk){return '<span class="text-[2px] px-[2px] rounded" style="color:'+t.accent+'">'+sk+'</span>';}).join('')+'</div>'
+            +'</div>';
+        }
+        sw.innerHTML=mini;
+        sw.addEventListener('click',function(){tplId=t.id;saveTemplate(t.id);selectEl.value=t.id;renderSwatches();render();});
+        w.appendChild(sw);
+      });
+    }
+    renderSwatches();
+
+    /* Mobile toggle */
+    document.getElementById('mobile-preview-toggle').addEventListener('click',function(){
+      var col=document.getElementById('preview-column');col.classList.toggle('hidden');
+      this.textContent=col.classList.contains('hidden')?'Preview':'Hide Preview';
+    });
+
+    render();
+  })();
+  </script>
+</BaseLayout>

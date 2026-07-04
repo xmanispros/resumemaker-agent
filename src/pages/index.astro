@@ -1,0 +1,189 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Online Resume Maker Free PDF — ResumeMaker Agent (No Payment)';
+const description =
+  'Build your resume for free with AI-guided builder, 90+ templates, and instant PDF download. No login, no payment, no watermark.';
+---
+<BaseLayout title={title} description={description} canonicalPath="/">
+  <!-- Hero -->
+  <section class="relative overflow-hidden" style="background: var(--neu-bg);">
+    <div class="absolute inset-0 bg-grain pointer-events-none"></div>
+    <div class="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:gap-12 sm:px-6 sm:py-16 lg:grid-cols-2 lg:items-center lg:py-24">
+      <div>
+        <div class="neu-badge inline-block mb-4 sm:mb-6">
+          <p class="eyebrow">100% free · No payment · No forced login</p>
+        </div>
+        <h1 class="text-3xl font-semibold leading-[1.1] sm:text-4xl lg:text-5xl" style="color: var(--neu-text);">
+          Online resume maker free PDF — guided by an AI agent, not a paywall.
+        </h1>
+        <p class="mt-4 max-w-lg text-base sm:mt-5 sm:text-lg" style="color: var(--neu-text-dim);">
+          Answer a few questions, watch your resume build itself in real time, and download it as a
+          free resume builder and download experience should be: fast, honest, no surprise fees.
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-3 sm:mt-8 sm:gap-4">
+          <a href="/builder" class="neu-btn-primary text-sm sm:text-base">Create Resume — It's Free</a>
+          <a href="/templates" class="neu-btn-secondary text-sm sm:text-base">Browse 90+ Templates</a>
+        </div>
+        <p class="mt-4 font-mono text-xs sm:mt-6" style="color: var(--neu-text-dim);">No credit card · No subscription · No dark patterns</p>
+
+        <!-- Dark mode demo widget -->
+        <div class="neu-card mt-6 flex max-w-xs items-center justify-between gap-3 p-3 sm:mt-8 sm:gap-4 sm:p-4">
+          <div>
+            <p class="text-sm font-semibold" style="color: var(--neu-text);">Dark mode</p>
+            <p class="text-xs" style="color: var(--neu-text-dim);">Try it right here on the homepage.</p>
+          </div>
+          <button data-theme-switch type="button" role="switch" aria-checked="false" aria-label="Toggle dark mode" class="neu-switch">
+            <span class="neu-switch-knob">
+              <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              <svg class="icon-moon hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hero Resume Skeleton -->
+      <div class="relative mx-auto w-full max-w-[260px] sm:max-w-sm">
+        <div class="hero-skeleton aspect-[210/297] w-full">
+          <div class="flex items-center gap-2 sm:gap-3" style="border-bottom: 1px solid var(--neu-dark); padding-bottom: 12px;">
+            <div class="h-10 w-10 rounded-2xl sm:h-12 sm:w-12" style="background: linear-gradient(145deg, #2ba4f0, #1a8fe0);"></div>
+            <div class="flex-1 space-y-1.5 sm:space-y-2">
+              <div class="h-2.5 w-20 rounded-full sm:h-3 sm:w-28" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+              <div class="h-2 w-24 rounded-full sm:w-36" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+            </div>
+          </div>
+          <div class="mt-3 space-y-1.5 sm:mt-4 sm:space-y-2">
+            <div class="h-1.5 w-full rounded-full sm:h-2" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+            <div class="h-1.5 w-5/6 rounded-full sm:h-2" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+            <div class="h-1.5 w-2/3 rounded-full sm:h-2" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+          </div>
+          <div class="mt-4 h-1.5 w-16 rounded-full sm:mt-6 sm:h-2 sm:w-20" style="background: linear-gradient(145deg, #2ba4f0, #1a8fe0);"></div>
+          <div class="mt-2 space-y-1.5 sm:mt-3 sm:space-y-2">
+            <div class="h-1.5 w-full rounded-full sm:h-2" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+            <div class="h-1.5 w-4/5 rounded-full sm:h-2" style="background: var(--neu-bg); box-shadow: inset 1px 1px 2px var(--neu-dark), inset -1px -1px 2px var(--neu-light);"></div>
+          </div>
+          <div class="mt-4 flex gap-1.5 sm:mt-6 sm:gap-2">
+            <span class="rounded-full px-2 py-0.5 text-[8px] font-medium text-teal sm:px-3 sm:py-1 sm:text-[10px]" style="background: var(--neu-bg); box-shadow: 2px 2px 4px var(--neu-dark), -2px -2px 4px var(--neu-light);">Skill</span>
+            <span class="rounded-full px-2 py-0.5 text-[8px] font-medium text-teal sm:px-3 sm:py-1 sm:text-[10px]" style="background: var(--neu-bg); box-shadow: 2px 2px 4px var(--neu-dark), -2px -2px 4px var(--neu-light);">Skill</span>
+            <span class="rounded-full px-2 py-0.5 text-[8px] font-medium text-teal sm:px-3 sm:py-1 sm:text-[10px]" style="background: var(--neu-bg); box-shadow: 2px 2px 4px var(--neu-dark), -2px -2px 4px var(--neu-light);">Skill</span>
+          </div>
+        </div>
+        <div class="neu-badge absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4">
+          <p class="font-mono text-[10px] sm:text-[11px]" style="color: var(--neu-text-dim);">PDF ready</p>
+          <p class="font-display text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">No watermark</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section style="background: var(--neu-bg);">
+    <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+      <div class="neu-badge inline-block mb-3 sm:mb-4">
+        <p class="eyebrow">How it works</p>
+      </div>
+      <h2 class="text-2xl font-semibold sm:text-3xl" style="color: var(--neu-text);">Three steps, guided by the agent.</h2>
+      <div class="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-3 sm:gap-6">
+        <div class="neu-step-card">
+          <div class="mb-3 flex h-9 w-9 items-center justify-center rounded-2xl sm:h-10 sm:w-10" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);">
+            <span class="font-mono text-sm font-bold text-teal">1</span>
+          </div>
+          <h3 class="text-base font-semibold sm:text-lg" style="color: var(--neu-text);">Tell the agent the basics</h3>
+          <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">Name, a photo, and one way to reach you — email or mobile. That's all it asks for first.</p>
+        </div>
+        <div class="neu-step-card">
+          <div class="mb-3 flex h-9 w-9 items-center justify-center rounded-2xl sm:h-10 sm:w-10" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);">
+            <span class="font-mono text-sm font-bold text-teal">2</span>
+          </div>
+          <h3 class="text-base font-semibold sm:text-lg" style="color: var(--neu-text);">Add detail, only if you want</h3>
+          <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">Summary, skills, education, experience and projects are optional — skip straight to preview if you're in a hurry.</p>
+        </div>
+        <div class="neu-step-card">
+          <div class="mb-3 flex h-9 w-9 items-center justify-center rounded-2xl sm:h-10 sm:w-10" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);">
+            <span class="font-mono text-sm font-bold text-teal">3</span>
+          </div>
+          <h3 class="text-base font-semibold sm:text-lg" style="color: var(--neu-text);">Preview and download free</h3>
+          <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">Switch templates without losing data, then download your resume as a free PDF — no login required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section style="background: var(--neu-bg);">
+    <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+      <div class="neu-badge inline-block mb-3 sm:mb-4">
+        <p class="eyebrow">Why ResumeMaker Agent</p>
+      </div>
+      <h2 class="text-2xl font-semibold sm:text-3xl" style="color: var(--neu-text);">A resume maker agent online free, by design.</h2>
+      <div class="mt-8 grid gap-4 sm:mt-10 sm:grid-cols-3 sm:gap-6">
+        {[
+          { t: 'Actually free', d: 'A free resume maker without payment — no trial that turns into a bill, no card required to download.', icon: '✦' },
+          { t: 'AI agent guided', d: 'The builder asks for required details first, then offers optional sections — never overwhelming you upfront.', icon: '◆' },
+          { t: 'No forced login', d: 'Your resume lives on your device. Create, edit, and download without creating an account.', icon: '●' },
+        ].map((b) => (
+          <div class="neu-benefit-card">
+            <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl sm:mb-4 sm:h-11 sm:w-11" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px var(--neu-dark), inset -2px -2px 4px var(--neu-light);">
+              <span class="text-teal text-base sm:text-lg">{b.icon}</span>
+            </div>
+            <h3 class="text-base font-semibold sm:text-lg" style="color: var(--neu-text);">{b.t}</h3>
+            <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">{b.d}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="neu-cta mt-8 flex flex-col items-start gap-4 sm:mt-12 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 class="text-lg font-semibold sm:text-xl" style="color: var(--neu-text);">Ready to build your resume?</h3>
+          <p class="mt-1 text-sm" style="color: var(--neu-text-dim);">Explore templates first, or jump straight into the builder.</p>
+        </div>
+        <div class="flex gap-3">
+          <a href="/templates" class="neu-btn-secondary text-sm sm:text-base">View Templates</a>
+          <a href="/builder" class="neu-btn-primary text-sm sm:text-base">Start Building</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- People Also Search For — Keywords Widget -->
+  <section style="background: var(--neu-bg);">
+    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+      <div class="neu-badge inline-block mb-3 sm:mb-4">
+        <p class="eyebrow">People also search for</p>
+      </div>
+      <h2 class="text-xl font-semibold sm:text-2xl" style="color: var(--neu-text);">Related searches</h2>
+
+      <!-- Primary Keywords Row -->
+      <div class="mt-6 overflow-hidden" style="mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);">
+        <div class="flex gap-3 animate-scroll-left" style="width: max-content;">
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Online resume maker free PDF</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Free resume builder and download</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Free resume maker without payment</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker online</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Online resume maker free PDF</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Free resume builder and download</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Free resume maker without payment</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker online</a>
+        </div>
+      </div>
+
+      <!-- Secondary / Agent Keywords Row -->
+      <div class="mt-3 overflow-hidden" style="mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);">
+        <div class="flex gap-3 animate-scroll-right" style="width: max-content;">
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume format</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent online free</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent online</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent free</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent PDF</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent download</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume format</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent online free</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent online</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent free</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent PDF</a>
+          <a href="/builder" class="flex-shrink-0 neu-pill text-xs sm:text-sm hover:text-teal transition-colors whitespace-nowrap">Resume maker agent download</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

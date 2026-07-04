@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'FAQ — Free Resume Builder Questions Answered | ResumeMaker Agent';
+const description = 'Answers to common questions about free resume builders, free PDF downloads, and how ResumeMaker Agent works without payment or login.';
+
+const faqs = [
+  { q: 'What are some resume builders that are actually free?', a: 'Many resume builders claim to be free but charge later. ResumeMaker Agent is an online resume maker free PDF platform that lets you create, preview, and download resumes without payment.' },
+  { q: 'What are the best free online resources for building a resume?', a: 'The best free resources are tools that allow resume creation, live preview, and PDF download. ResumeMaker Agent works as a resume maker agent online free with no hidden fees.' },
+  { q: 'What is the best free AI resume builder where I can upload my current resume and edit it?', a: 'ResumeMaker Agent allows users to edit and improve resumes using AI while staying completely free, making it a reliable resume maker agent PDF solution.' },
+  { q: 'What is a free resume builder platform to get my dream job?', a: 'A free resume builder with ATS-friendly resume format and modern templates like ResumeMaker Agent helps job seekers apply confidently without paying.' },
+  { q: 'Are there any free resume builders? I used Zety and it was not free.', a: 'Yes. ResumeMaker Agent is a free resume maker without payment, designed to avoid misleading paywalls and forced subscriptions.' },
+  { q: 'What is the best free resume builder in India?', a: 'ResumeMaker Agent is ideal for users in India because it offers simple resume formats, mobile support, and free PDF downloads.' },
+  { q: 'How can I download a resume without paying?', a: 'You can download a resume without paying by using a free resume builder and download platform like ResumeMaker Agent.' },
+  { q: 'How do I make a free professional CV by using AI?', a: 'By entering your basic details, ResumeMaker Agent uses AI to structure and improve your resume while remaining fully free.' },
+  { q: 'Which is the best app or website for making a resume?', a: 'The best option is a resume maker online that supports templates, preview, and free PDF export like ResumeMaker Agent.' },
+  { q: 'Where can I find an online resume builder?', a: "You can find an online resume maker free PDF directly on ResumeMaker Agent's website." },
+  { q: 'What are the best resume builder apps?', a: 'The best resume builder apps are those that are mobile-friendly, easy to use, and free—ResumeMaker Agent fits all these criteria.' },
+];
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://resumemakeragent.com/faq" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/faq">
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16" style="background: var(--neu-bg);">
+    <div class="neu-badge inline-block mb-4">
+      <p class="eyebrow">FAQ</p>
+    </div>
+    <h1 class="text-4xl font-semibold" style="color: var(--neu-text);">Frequently asked questions.</h1>
+    <p class="mt-3" style="color: var(--neu-text-dim);">Everything you need to know about building a free resume with ResumeMaker Agent.</p>
+
+    <div class="mt-10 space-y-4">
+      {faqs.map((f) => (
+        <details class="faq-item group">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-medium" style="color: var(--neu-text);">
+            {f.q}
+            <span class="neu-icon-btn !w-8 !h-8 flex-shrink-0 !rounded-xl text-teal transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <p class="mt-3 text-sm" style="color: var(--neu-text-dim);">{f.a}</p>
+        </details>
+      ))}
+    </div>
+
+    <div class="neu-cta mt-12 text-center">
+      <h2 class="text-xl font-semibold" style="color: var(--neu-text);">Still have questions?</h2>
+      <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">Try the builder — you can preview before you ever need to download anything.</p>
+      <a href="/builder" class="neu-btn-primary mt-5 inline-flex">Create Resume — It's Free</a>
+    </div>
+  </section>
+</BaseLayout>

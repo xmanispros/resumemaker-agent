@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const title = 'Terms and Conditions | ResumeMaker Agent';
+const description = 'Terms of use for ResumeMaker Agent, the free online resume maker with no payment required.';
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
+    { "@type": "ListItem", "position": 2, "name": "Terms & Conditions", "item": "https://resumemakeragent.com/terms-and-conditions" }
+  ]
+};
+---
+<BaseLayout title={title} description={description} canonicalPath="/terms-and-conditions">
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16" style="background: var(--neu-bg);">
+    <div class="neu-badge inline-block mb-4">
+      <p class="eyebrow">Legal</p>
+    </div>
+    <h1 class="text-4xl font-semibold style="color: var(--neu-text);">Terms &amp; Conditions</h1>
+    <p class="mt-2 text-sm style="color: var(--neu-text-dim);">Last updated: June 2026</p>
+
+    <div class="neu-card mt-8 space-y-6 p-6 sm:p-8">
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">Using ResumeMaker Agent</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          ResumeMaker Agent is provided as a free resume maker without payment. By using the builder,
+          templates, and PDF download features, you agree to use the platform only for creating your
+          own genuine resume content.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">No payment, no subscription</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          We do not charge for resume creation, template access, or PDF download. There is no
+          subscription tier and no credit card requirement anywhere on this site.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">Ownership of your content</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          You retain full ownership of the resume content you create. ResumeMaker Agent does not claim
+          rights over your name, photo, work history, or any other personal content you enter.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">Service availability</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          We aim to keep the builder available and functional at all times, but we don't guarantee
+          uninterrupted access. Features may be updated, renamed, or improved without prior notice.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">Acceptable use</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          Don't use the platform to create misleading or fraudulent documents impersonating someone
+          else, or to abuse the service in a way that disrupts it for other users.
+        </p>
+      </div>
+      <div class="neu-divider"></div>
+      <div>
+        <h2 class="text-lg font-semibold style="color: var(--neu-text);">Changes to these terms</h2>
+        <p class="mt-2 text-sm style="color: var(--neu-text-dim);">
+          We may update these terms from time to time. Continued use of ResumeMaker Agent after changes
+          are posted means you accept the revised terms.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
