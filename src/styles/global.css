@@ -409,6 +409,15 @@
     color: #2196F3;
   }
 
+  .brand-logo {
+    @apply h-10 w-10 object-contain transition-all duration-300;
+  }
+  @media (min-width: 640px) {
+    .brand-logo {
+      @apply h-12 w-12;
+    }
+  }
+
   .neu-header {
     background: var(--neu-bg);
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
