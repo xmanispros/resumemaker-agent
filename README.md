@@ -2,6 +2,10 @@
 
 Online resume maker free PDF — no payment, no forced login. Built with **Astro** + **Tailwind CSS**.
 
+## Live Demo
+
+**https://xmanispros.github.io/resumemaker-agent/**
+
 ## Run it locally
 
 ```bash
