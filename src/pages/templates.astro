@@ -10,8 +10,8 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://resumemakeragent.com" },
-    { "@type": "ListItem", "position": 2, "name": "Templates", "item": "https://resumemakeragent.com/templates" }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://xmanispros.github.io/resumemaker-agent" },
+    { "@type": "ListItem", "position": 2, "name": "Templates", "item": "https://xmanispros.github.io/resumemaker-agent/templates" }
   ]
 };
 ---
@@ -39,7 +39,7 @@ const breadcrumbSchema = {
     <div id="template-grid" class="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
       {templates.map((t) => (
         <a
-          href={`/builder?template=${t.id}`}
+          href={`/resumemaker-agent/builder?template=${t.id}`}
           class="template-card group block"
           data-category={t.category}
         >
