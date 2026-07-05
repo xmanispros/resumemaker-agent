@@ -9,12 +9,25 @@ const breadcrumbSchema = {
   "@type": "BreadcrumbList",
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://xmanispros.github.io/resumemaker-agent" },
-    { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://xmanispros.github.io/contact" }
+    { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://xmanispros.github.io/resumemaker-agent/contact" }
   ]
+};
+
+const contactSchema = {
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact ResumeMaker Agent",
+  "url": "https://xmanispros.github.io/resumemaker-agent/contact",
+  "mainEntity": {
+    "@type": "Organization",
+    "name": "ResumeMaker Agent",
+    "email": "info.cheride@gmail.com"
+  }
 };
 ---
 <BaseLayout title={title} description={description} canonicalPath="/contact">
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(contactSchema)} />
   <section class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16" style="background: var(--neu-bg);">
     <div class="neu-badge inline-block mb-4">
       <p class="eyebrow">Get in touch</p>
@@ -76,7 +89,7 @@ const breadcrumbSchema = {
     </div>
   </section>
 
-  <script is:inline>
+  <script is:inline defer>
     (function () {
       const form = document.getElementById('contact-form');
       const status = document.getElementById('contact-status');

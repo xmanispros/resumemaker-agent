@@ -27,6 +27,9 @@ const ogImage = siteUrl + '/og-image.svg';
     <meta property="og:url" content={siteUrl + canonicalPath} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@ResumeMakerAgent" />
     <meta name="twitter:title" content={title} />
@@ -66,7 +69,6 @@ const ogImage = siteUrl + '/og-image.svg';
         document.documentElement.classList.toggle('dark', dark);
       })();
     </script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
   </head>
   <body>
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-teal focus:text-white focus:px-3 focus:py-2 focus:rounded-2xl">Skip to content</a>
@@ -84,6 +86,7 @@ const ogImage = siteUrl + '/og-image.svg';
           <a href="/resumemaker-agent/builder" class="neu-nav-link rounded-xl px-3 py-2 lg:px-4">Builder</a>
           <a href="/resumemaker-agent/about" class="neu-nav-link rounded-xl px-3 py-2 lg:px-4">About</a>
           <a href="/resumemaker-agent/faq" class="neu-nav-link rounded-xl px-3 py-2 lg:px-4">FAQ</a>
+          <a href="/resumemaker-agent/contact" class="neu-nav-link rounded-xl px-3 py-2 lg:px-4">Contact</a>
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
@@ -112,6 +115,7 @@ const ogImage = siteUrl + '/og-image.svg';
           <a href="/resumemaker-agent/builder" class="block rounded-xl px-4 py-3 text-sm font-medium transition-colors" style="color: var(--neu-text-muted); background: var(--neu-bg); box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);">Builder</a>
           <a href="/resumemaker-agent/about" class="block rounded-xl px-4 py-3 text-sm font-medium transition-colors" style="color: var(--neu-text-muted); background: var(--neu-bg); box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);">About</a>
           <a href="/resumemaker-agent/faq" class="block rounded-xl px-4 py-3 text-sm font-medium transition-colors" style="color: var(--neu-text-muted); background: var(--neu-bg); box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);">FAQ</a>
+          <a href="/resumemaker-agent/contact" class="block rounded-xl px-4 py-3 text-sm font-medium transition-colors" style="color: var(--neu-text-muted); background: var(--neu-bg); box-shadow: 3px 3px 6px var(--neu-dark), -3px -3px 6px var(--neu-light);">Contact</a>
           <a href="/resumemaker-agent/builder" class="block rounded-xl px-4 py-3 text-sm font-semibold text-white text-center" style="background: linear-gradient(145deg, #2ba4f0, #1a8fe0);">Create Resume</a>
         </div>
       </div>
@@ -127,8 +131,8 @@ const ogImage = siteUrl + '/og-image.svg';
         <div class="grid grid-cols-2 gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div class="col-span-2 sm:col-span-2 md:col-span-1">
             <div class="flex items-center gap-2 mb-2">
-              <img src="/resumemaker-agent/branding/Logo_dark.svg" alt="ResumeMaker Agent" class="brand-logo dark:hidden" />
-              <img src="/resumemaker-agent/branding/Logo_light.svg" alt="ResumeMaker Agent" class="brand-logo hidden dark:block" />
+              <img src="/resumemaker-agent/branding/Logo_dark.svg" alt="ResumeMaker Agent" class="brand-logo dark:hidden" loading="lazy" />
+              <img src="/resumemaker-agent/branding/Logo_light.svg" alt="ResumeMaker Agent" class="brand-logo hidden dark:block" loading="lazy" />
             </div>
             <p class="font-display text-lg font-semibold" style="color: var(--neu-text);">ResumeMaker Agent</p>
             <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">Online resume maker free PDF — no payment required, ever.</p>
