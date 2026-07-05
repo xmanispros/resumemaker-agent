@@ -283,23 +283,27 @@ const breadcrumbSchema = {
     /* ══════════════════════════════════════════════════════
        DOCX generation using the `docx` library
        ══════════════════════════════════════════════════════ */
-    var D=window.docx;
+    function getDocxLib(){return window.docx;}
 
     function hexNoHash(h){return (h||'').replace('#','');}
 
     function accentBorder(accent){
+      var D=getDocxLib();
       return{style:D.BorderStyle.SINGLE,size:6,color:hexNoHash(accent),space:1};
     }
     function noBorder(){
+      var D=getDocxLib();
       var b={style:D.BorderStyle.NONE,size:0,color:'FFFFFF',space:0};
       return{top:b,left:b,bottom:b,right:b};
     }
     function noCellBorders(){
+      var D=getDocxLib();
       var n={style:D.BorderStyle.NONE,size:0,color:'auto',space:0};
       return{top:n,left:n,bottom:n,right:n};
     }
 
     function secTitle(text,color){
+      var D=getDocxLib();
       return new D.Paragraph({
         children:[new D.TextRun({text:text.toUpperCase(),bold:true,font:'Arial',size:26,color:hexNoHash(color)})],
         spacing:{before:120,after:80,line:276},
@@ -308,6 +312,7 @@ const breadcrumbSchema = {
     }
 
     function bodyP(text,opts){
+      var D=getDocxLib();
       opts=opts||{};
       var runs=[];
       if(opts.runs){runs=opts.runs;}
@@ -344,6 +349,7 @@ const breadcrumbSchema = {
     }
 
     function sidebarParas(d,name,contactStr){
+      var D=getDocxLib();
       var p=[];
       p.push(new D.Paragraph({
         children:[new D.TextRun({text:name,bold:true,font:'Arial',size:44,color:'FFFFFF'})],
@@ -406,9 +412,14 @@ const breadcrumbSchema = {
       return p;
     }
 
-    function emptyPara(){return new D.Paragraph({children:[],spacing:{after:0}});}
+    function emptyPara(){
+      var D=getDocxLib();
+      return new D.Paragraph({children:[],spacing:{after:0}});
+    }
 
     function buildDocx(d,t){
+      var D=getDocxLib();
+      if(!D){throw new Error('DOCX library not loaded. Please refresh the page and try again.');}
       var name=d.fullName||'Resume';
       var contactParts=[];if(d.contactValue)contactParts.push(d.contactValue);if(d.location)contactParts.push(d.location);
       var contactStr=contactParts.join('  •  ');
@@ -733,6 +744,80 @@ const breadcrumbSchema = {
     }
 
     /* ══════════════════════════════════════════════════════
+       DOCX FALLBACK: HTML file that Word can open
+       ══════════════════════════════════════════════════════ */
+    function buildDocxHtmlFallback(d,t){
+      var ac=t.accent;
+      var name=esc(d.fullName)||'Resume';
+      var contact=[];
+      if(d.contactValue)contact.push(esc(d.contactValue));
+      if(d.location)contact.push(esc(d.location));
+      var contactStr=contact.join(' &bull; ');
+
+      var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+name+' - Resume</title>'
+        +'<style>'
+        +'body{font-family:Arial,Helvetica,sans-serif;color:#1B2440;margin:40px;line-height:1.5;}'
+        +'h1{font-size:24px;margin-bottom:4px;}'
+        +'.contact{color:#5B6B8C;font-size:13px;margin-bottom:20px;}'
+        +'h2{font-size:14px;text-transform:uppercase;letter-spacing:0.1em;color:'+ac+';border-bottom:2px solid '+ac+';padding-bottom:4px;margin-top:20px;margin-bottom:10px;}'
+        +'.skill{display:inline-block;border:1px solid '+ac+';color:'+ac+';padding:2px 10px;border-radius:12px;font-size:12px;margin:2px;}'
+        +'.item{margin-bottom:12px;}'
+        +'.item-head{font-weight:600;font-size:14px;}'
+        +'.item-meta{color:#5B6B8C;font-size:12px;}'
+        +'.item-sub{color:#5B6B8C;font-size:13px;}'
+        +'.body{text;font-size:13px;color:#2A3654;}'
+        +'</style></head><body>';
+
+      html+='<h1>'+name+'</h1><div class="contact">'+contactStr+'</div>';
+
+      if(d.summary){
+        html+='<h2>Summary</h2><p class="body">'+esc(d.summary)+'</p>';
+      }
+      if(d.experience&&d.experience.length){
+        html+='<h2>Experience</h2>';
+        d.experience.forEach(function(e){
+          if(!e.role&&!e.company)return;
+          html+='<div class="item"><div class="item-head">'+esc(e.role)+(e.company?' &mdash; '+esc(e.company):'')+'</div>';
+          if(e.duration)html+='<div class="item-meta">'+esc(e.duration)+'</div>';
+          if(e.description)html+='<p class="body">'+esc(e.description)+'</p>';
+          html+='</div>';
+        });
+      }
+      if(d.projects&&d.projects.length){
+        html+='<h2>Projects</h2>';
+        d.projects.forEach(function(p){
+          if(!p.name)return;
+          html+='<div class="item"><div class="item-head">'+esc(p.name)+'</div>';
+          if(p.description)html+='<p class="body">'+esc(p.description)+'</p>';
+          html+='</div>';
+        });
+      }
+      if(d.skills&&d.skills.length){
+        html+='<h2>Skills</h2><p>';
+        d.skills.filter(Boolean).forEach(function(s){
+          html+='<span class="skill">'+esc(s)+'</span> ';
+        });
+        html+='</p>';
+      }
+      if(d.education&&d.education.length){
+        html+='<h2>Education</h2>';
+        d.education.forEach(function(e){
+          if(!e.degree&&!e.school)return;
+          html+='<div class="item"><div class="item-head">'+esc(e.degree)+'</div>';
+          if(e.school)html+='<div class="item-sub">'+esc(e.school)+'</div>';
+          if(e.year)html+='<div class="item-meta">'+esc(e.year)+'</div>';
+          html+='</div>';
+        });
+      }
+      if(d.links&&d.links.length){
+        html+='<h2>Links</h2><p class="body">'+d.links.filter(Boolean).map(function(l){return esc(l);}).join(' &bull; ')+'</p>';
+      }
+
+      html+='</body></html>';
+      return html;
+    }
+
+    /* ══════════════════════════════════════════════════════
        AD OVERLAY MODAL
        ══════════════════════════════════════════════════════ */
     var adOverlay=document.getElementById('ad-overlay');
@@ -801,6 +886,13 @@ const breadcrumbSchema = {
       if(directBtn)directBtn.style.pointerEvents='none';
 
       if(selectedFormat==='docx'){
+        var D=getDocxLib();
+        if(!D){
+          showProgress('').setError('Word library is still loading. Please wait a moment and try again, or choose PDF format.');
+          btn.disabled=false;
+          if(directBtn)directBtn.style.pointerEvents='';
+          return;
+        }
         var p=showProgress('Generating Word document…');
         p.setPercent(30);
         try{
@@ -817,11 +909,25 @@ const breadcrumbSchema = {
             btn.disabled=false;
             if(directBtn)directBtn.style.pointerEvents='';
           }).catch(function(err){
-            showProgress('').setError('DOCX generation failed: '+err.message+'. Try PDF format instead.');
+            console.warn('DOCX Packer failed:', err);
+            document.getElementById('ad-progress').textContent='Word packing failed, trying alternative…';
+            /* Fallback: download as rich HTML that Word can open */
+            try{
+              var tpl2=allTemplates.find(function(x){return x.id===currentTplId;})||allTemplates[0];
+              var htmlContent=buildDocxHtmlFallback(data,tpl2);
+              var blob2=new Blob([htmlContent],{type:'application/msword'});
+              downloadBlob(blob2,getFileName()+'.doc');
+              p.setPercent(100);
+              document.getElementById('ad-progress').textContent='Downloaded as Word-compatible file.';
+              setTimeout(function(){p.hide();},2000);
+            }catch(e2){
+              showProgress('').setError('Word generation failed: '+err.message+'. Try PDF format instead.');
+            }
             btn.disabled=false;
             if(directBtn)directBtn.style.pointerEvents='';
           });
         }catch(err){
+          console.error('DOCX build error:', err);
           showProgress('').setError('DOCX generation failed: '+err.message+'. Try PDF format instead.');
           btn.disabled=false;
           if(directBtn)directBtn.style.pointerEvents='';
