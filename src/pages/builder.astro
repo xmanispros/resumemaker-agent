@@ -34,7 +34,7 @@ const breadcrumbSchema = {
       <div class="flex items-center gap-2 sm:gap-3">
         <select id="template-select" class="neu-select !w-auto !py-2 text-xs sm:text-sm"></select>
         <button id="mobile-preview-toggle" class="neu-btn-sm lg:hidden text-xs sm:text-sm">Preview</button>
-        <a href="/resumemaker-agent/download" id="download-link" class="neu-btn-primary !px-3 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:text-sm">Download</a>
+        <a href="/resumemaker-agent/download" id="download-link" class="neu-btn-primary !px-3 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:text-sm hidden sm:inline-flex">Download</a>
       </div>
     </div>
 
@@ -80,14 +80,14 @@ const breadcrumbSchema = {
         </div>
 
         <!-- Summary -->
-        <div class="neu-card space-y-3 p-5">
-          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Professional Summary</h2>
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
+          <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Professional Summary</h2>
           <textarea id="summary" class="neu-textarea" rows="3" placeholder="A short professional summary..."></textarea>
         </div>
 
         <!-- Skills -->
-        <div class="neu-card space-y-3 p-5">
-          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Skills</h2>
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
+          <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Skills</h2>
           <div class="flex gap-2">
             <input id="skill-input" class="neu-input flex-1" type="text" placeholder="e.g. Product Strategy" />
             <button id="skill-add" type="button" class="neu-btn-sm">Add</button>
@@ -96,35 +96,35 @@ const breadcrumbSchema = {
         </div>
 
         <!-- Education -->
-        <div class="neu-card space-y-3 p-5">
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Education</h2>
+            <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Education</h2>
             <button data-add="education" type="button" class="neu-btn-sm text-teal">+ Add</button>
           </div>
           <div id="education-list" class="space-y-3"></div>
         </div>
 
         <!-- Experience -->
-        <div class="neu-card space-y-3 p-5">
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Experience</h2>
+            <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Experience</h2>
             <button data-add="experience" type="button" class="neu-btn-sm text-teal">+ Add</button>
           </div>
           <div id="experience-list" class="space-y-3"></div>
         </div>
 
         <!-- Projects -->
-        <div class="neu-card space-y-3 p-5">
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
           <div class="flex items-center justify-between">
-            <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Projects</h2>
+            <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Projects</h2>
             <button data-add="projects" type="button" class="neu-btn-sm text-teal">+ Add</button>
           </div>
           <div id="projects-list" class="space-y-3"></div>
         </div>
 
         <!-- Links -->
-        <div class="neu-card space-y-3 p-5">
-          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Social Links</h2>
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
+          <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Social Links</h2>
           <div class="flex gap-2">
             <input id="link-input" class="neu-input flex-1" type="text" placeholder="linkedin.com/in/you" />
             <button id="link-add" type="button" class="neu-btn-sm">Add</button>
@@ -133,23 +133,41 @@ const breadcrumbSchema = {
         </div>
 
         <!-- Template swatches -->
-        <div class="neu-card space-y-3 p-5">
-          <h2 class="text-sm font-semibold" style="color: var(--neu-text);">Choose Template</h2>
-          <div id="template-swatches" class="grid grid-cols-5 gap-3 sm:grid-cols-6"></div>
+        <div class="neu-card space-y-3 p-3 sm:space-y-4 sm:p-5">
+          <h2 class="text-xs font-semibold sm:text-sm" style="color: var(--neu-text);">Choose Template</h2>
+          <div id="template-swatches" class="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3"></div>
         </div>
+
+        <!-- Download button (bottom) -->
+        <a href="/resumemaker-agent/download" class="neu-btn-primary w-full justify-center !py-3 text-sm sm:!py-3.5 sm:text-base">Download Resume</a>
       </div>
 
       <!-- PREVIEW COLUMN -->
       <div id="preview-column" class="hidden lg:block">
-        <div class="sticky top-24">
+        <div class="lg:sticky lg:top-24">
           <div class="mb-3 flex items-center justify-between">
             <div class="neu-badge inline-block">
               <p class="eyebrow">Live Preview</p>
             </div>
           </div>
-          <div class="rsm-frame mx-auto max-w-md">
+          <div class="rsm-frame mx-auto max-w-sm sm:max-w-md">
             <div id="resume-preview"></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile preview (shown below form on toggle) -->
+    <div id="mobile-preview-section" class="hidden mt-6 lg:hidden">
+      <div class="neu-card p-4">
+        <div class="mb-3 flex items-center justify-between">
+          <div class="neu-badge inline-block">
+            <p class="eyebrow">Live Preview</p>
+          </div>
+          <button id="mobile-preview-close" class="neu-btn-sm text-xs">Hide</button>
+        </div>
+        <div class="rsm-frame mx-auto max-w-sm">
+          <div id="mobile-resume-preview"></div>
         </div>
       </div>
     </div>
@@ -234,6 +252,9 @@ const breadcrumbSchema = {
       persist();
       var t = allTemplates.find(function(x){return x.id===tplId;})||allTemplates[0];
       document.getElementById('resume-preview').innerHTML = buildHTML(data, t);
+      if (!mobilePreviewSection.classList.contains('hidden')) {
+        document.getElementById('mobile-resume-preview').innerHTML = buildHTML(data, t);
+      }
     }
 
     /* Basic fields */
@@ -404,10 +425,24 @@ const breadcrumbSchema = {
     renderSwatches();
 
     /* Mobile toggle */
+    var mobilePreviewSection = document.getElementById('mobile-preview-section');
+    var mobilePreviewClose = document.getElementById('mobile-preview-close');
+    
     document.getElementById('mobile-preview-toggle').addEventListener('click',function(){
-      var col=document.getElementById('preview-column');col.classList.toggle('hidden');
-      this.textContent=col.classList.contains('hidden')?'Preview':'Hide Preview';
+      mobilePreviewSection.classList.toggle('hidden');
+      this.textContent = mobilePreviewSection.classList.contains('hidden') ? 'Preview' : 'Hide Preview';
+      if (!mobilePreviewSection.classList.contains('hidden')) {
+        var t = allTemplates.find(function(x){return x.id===tplId;})||allTemplates[0];
+        document.getElementById('mobile-resume-preview').innerHTML = buildHTML(data, t);
+      }
     });
+    
+    if (mobilePreviewClose) {
+      mobilePreviewClose.addEventListener('click', function(){
+        mobilePreviewSection.classList.add('hidden');
+        document.getElementById('mobile-preview-toggle').textContent = 'Preview';
+      });
+    }
 
     render();
   })();
