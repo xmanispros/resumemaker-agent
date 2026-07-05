@@ -27,12 +27,18 @@ const breadcrumbSchema = {
     <div class="neu-card mt-8 p-6 sm:p-8">
       <form id="contact-form" class="space-y-5">
         <div>
-          <label class="label-text" for="name">Your name</label>
+          <label class="label-text" for="name">Your name *</label>
           <input id="name" name="name" class="neu-input" type="text" placeholder="Jane Doe" required />
         </div>
-        <div>
-          <label class="label-text" for="email">Your email</label>
-          <input id="email" name="email" class="neu-input" type="email" placeholder="you@example.com" required />
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label class="label-text" for="email">Your email *</label>
+            <input id="email" name="email" class="neu-input" type="email" placeholder="you@example.com" required />
+          </div>
+          <div>
+            <label class="label-text" for="mobile">Mobile number *</label>
+            <input id="mobile" name="mobile" class="neu-input" type="tel" placeholder="+91 98765 43210" required />
+          </div>
         </div>
         <div>
           <label class="label-text" for="subject">Subject</label>
@@ -44,7 +50,7 @@ const breadcrumbSchema = {
           </select>
         </div>
         <div>
-          <label class="label-text" for="message">Message</label>
+          <label class="label-text" for="message">Message *</label>
           <textarea id="message" name="message" class="neu-textarea" rows="5" placeholder="Tell us what's on your mind..." required></textarea>
         </div>
         <button type="submit" class="neu-btn-primary w-full justify-center">Send Message</button>
@@ -58,7 +64,7 @@ const breadcrumbSchema = {
           <span class="text-teal">@</span>
         </div>
         <p class="text-sm font-semibold" style="color: var(--neu-text);">Support email</p>
-        <p class="mt-1 text-sm" style="color: var(--neu-text-dim);">support@resumemakeragent.example.com</p>
+        <p class="mt-1 text-sm" style="color: var(--neu-text-dim);"><a href="mailto:info.cheride@gmail.com" class="text-teal hover:underline">info.cheride@gmail.com</a></p>
       </div>
       <div class="neu-card p-5">
         <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl" style="background: var(--neu-bg); box-shadow: inset 2px 2px 4px #b8bec7, inset -2px -2px 4px #ffffff;">
@@ -76,14 +82,26 @@ const breadcrumbSchema = {
       const status = document.getElementById('contact-status');
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const mobile = document.getElementById('mobile').value.trim();
         const subject = document.getElementById('subject').value;
-        const message = document.getElementById('message').value;
-        const body = encodeURIComponent(`From: ${name} (${email})\n\n${message}`);
-        const mailto = `mailto:support@resumemakeragent.example.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+        const message = document.getElementById('message').value.trim();
+        const tag = 'resumemaker-agent-query';
+        const body = [
+          '[ ' + tag + ' ]',
+          '',
+          'Name: ' + name,
+          'Email: ' + email,
+          'Mobile: ' + mobile,
+          'Subject: ' + subject,
+          '',
+          'Message:',
+          message
+        ].join('\n');
+        const mailto = 'mailto:info.cheride@gmail.com?subject=' + encodeURIComponent('[' + tag + '] ' + subject) + '&body=' + encodeURIComponent(body);
         window.location.href = mailto;
-        status.textContent = "Opening your email app to send this message…";
+        status.textContent = 'Opening your email app to send this message…';
         status.classList.remove('hidden');
       });
     })();

@@ -65,6 +65,32 @@ const breadcrumbSchema = {
     </p>
   </section>
 
+  <!-- Ad Overlay Modal -->
+  <div id="ad-overlay" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);">
+    <div class="relative w-full max-w-md rounded-2xl overflow-hidden text-center" style="background: var(--neu-bg); box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+      <div class="absolute right-3 top-3 z-10">
+        <span id="ad-timer" class="inline-block rounded-full px-3 py-1 text-xs font-semibold" style="background: rgba(0,0,0,0.5); color: #fff;">Skip in 5s</span>
+      </div>
+      <div class="flex items-center justify-center" style="height: 260px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);">
+        <iframe id="ad-video-frame" src="" class="w-full h-full" style="border:none; display:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <div id="ad-placeholder" class="text-center px-6">
+          <div class="mb-3 inline-flex h-16 w-16 items-center justify-center rounded-2xl" style="background: linear-gradient(135deg, #2196F3, #1976D2);">
+            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-white">Advertisement</p>
+          <p class="mt-1 text-xs text-white/60">Supports free resume building</p>
+        </div>
+      </div>
+      <div class="p-5">
+        <p id="ad-status" class="mb-3 text-sm font-medium" style="color: var(--neu-text);">Loading ad...</p>
+        <button id="ad-skip-btn" class="neu-btn-primary w-full justify-center hidden" disabled>
+          Download Now
+        </button>
+        <p class="mt-2 text-xs" style="color: var(--neu-text-dim);">Your download will start automatically</p>
+      </div>
+    </div>
+  </div>
+
   <script is:inline src="/js/html2canvas.min.js"></script>
   <script is:inline src="/js/jspdf.umd.min.js"></script>
   <script is:inline src="/js/docx.min.js"></script>
@@ -76,6 +102,7 @@ const breadcrumbSchema = {
     var TEMPLATE_KEY = 'rma-selected-template';
     var selectedFormat = 'pdf';
     var currentTplId = null;
+    var pendingDownload = null;
 
     /* ── Helpers ── */
     function defaultData() {
@@ -501,6 +528,11 @@ const breadcrumbSchema = {
       document.body.appendChild(a);a.click();
       setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},200);
     }
+    function downloadDataURL(dataUrl,filename){
+      var a=document.createElement('a');a.href=dataUrl;a.download=filename;
+      document.body.appendChild(a);a.click();
+      setTimeout(function(){document.body.removeChild(a);},200);
+    }
     function getFileName(){return(data.fullName||'resume').trim().replace(/\s+/g,'_').toLowerCase();}
 
     function showProgress(msg){
@@ -518,7 +550,247 @@ const breadcrumbSchema = {
       };
     }
 
-    /* ── Download handler ── */
+    /* ── CSS injection helper for off-screen PDF render ── */
+    function getResumeCSS(w,h){
+      return `
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { width: ${w}px; height: ${h}px; margin: 0; padding: 0; background: #ffffff; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .rsm-doc { font-family: 'Inter','Segoe UI',system-ui,-apple-system,sans-serif; font-size: 16px; line-height: 1.6; color: #1B2440; width: ${w}px; height: ${h}px; overflow: hidden; background: #ffffff; box-sizing: border-box; }
+        .rsm-single { padding: 38px 44px; display: flex; flex-direction: column; height: 100%; }
+        .rsm-band { padding: 0; height: 100%; display: flex; flex-direction: column; }
+        .rsm-band-top { padding: 28px 44px 20px; }
+        .rsm-band-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; padding: 24px 44px 32px; flex: 1; }
+        .rsm-sidebar-layout { display: flex; height: 100%; min-height: 0; }
+        .rsm-sidebar { width: 34%; padding: 32px 24px; color: white; display: flex; flex-direction: column; align-items: flex-start; overflow-y: auto; box-sizing: border-box; }
+        .rsm-main { width: 66%; padding: 30px 30px; display: flex; flex-direction: column; box-sizing: border-box; }
+        .rsm-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+        .rsm-photo { width: 66px; height: 66px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+        .rsm-photo-fallback { display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 24px; }
+        .rsm-name { font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
+        .rsm-contact { font-size: 13px; color: #5B6B8C; margin-top: 4px; }
+        .rsm-rule { border: none; border-top: 1.5px solid; margin: 16px 0 20px; }
+        .rsm-section { margin-bottom: 18px; }
+        .rsm-section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; color: #5B6B8C; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #E2E8F0; }
+        .rsm-body { font-size: 15px; color: #2A3654; line-height: 1.65; }
+        .rsm-item { margin-bottom: 14px; }
+        .rsm-item:last-child { margin-bottom: 0; }
+        .rsm-item-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+        .rsm-item-title { font-weight: 600; font-size: 16px; color: #1B2440; }
+        .rsm-item-meta { font-size: 13px; color: #5B6B8C; white-space: nowrap; }
+        .rsm-item-sub { font-size: 14px; color: #5B6B8C; }
+        .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; }
+        .rsm-pill { font-size: 12px; padding: 4px 13px; border: 1.5px solid; border-radius: 999px; font-weight: 500; line-height: 1.4; }
+        .rsm-links { display: flex; flex-direction: column; gap: 6px; }
+        .rsm-link { font-size: 13px; color: #2A3654; word-break: break-all; }
+        .rsm-sidebar .rsm-photo-fallback { background: rgba(255,255,255,0.2) !important; }
+        .rsm-sidebar .rsm-name-sidebar { font-size: 22px; color: white; margin-top: 14px; font-weight: 700; }
+        .rsm-sidebar .rsm-contact-sidebar { color: rgba(255,255,255,0.85); font-size: 12.5px; margin-top: 4px; }
+        .rsm-sidebar .rsm-section { margin-bottom: 16px; }
+        .rsm-sidebar .rsm-section-title { color: rgba(255,255,255,0.7); border-bottom-color: rgba(255,255,255,0.25); font-size: 12px; }
+        .rsm-sidebar .rsm-body, .rsm-sidebar .rsm-item-sub, .rsm-sidebar .rsm-item-meta { color: rgba(255,255,255,0.9); }
+        .rsm-sidebar .rsm-item-title { color: white; font-size: 14px; }
+        .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; }
+        .rsm-sidebar .rsm-link { color: rgba(255,255,255,0.9); }
+        .rsm-sidebar-sections { margin-top: 18px; width: 100%; }
+        .font-display { font-family: 'Fraunces', Georgia, serif; }
+        .font-sans { font-family: 'Inter','Segoe UI',system-ui,-apple-system,sans-serif; }
+      `;
+    }
+
+    function buildPDFWrapper(){
+      var A4_W=794, A4_H=1123;
+      var wrapper=document.createElement('div');
+      wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:'+A4_W+'px;height:'+A4_H+'px;background:#ffffff;overflow:hidden;margin:0;padding:0;';
+      var allStyles=document.createElement('style');
+      allStyles.textContent=getResumeCSS(A4_W,A4_H);
+      wrapper.appendChild(allStyles);
+      var previewEl=document.getElementById('resume-preview');
+      var resumeClone=previewEl.cloneNode(true);
+      resumeClone.style.cssText='width:'+A4_W+'px;height:'+A4_H+'px;box-sizing:border-box;';
+      wrapper.appendChild(resumeClone);
+      return wrapper;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       PDF METHOD 1: html2canvas + jsPDF (primary)
+       ══════════════════════════════════════════════════════ */
+    function pdfMethod_html2canvas(){
+      return new Promise(function(resolve, reject){
+        if(typeof html2canvas==='undefined'||typeof jspdf==='undefined'){
+          reject(new Error('LIBS_NOT_LOADED'));
+          return;
+        }
+        var wrapper=buildPDFWrapper();
+        document.body.appendChild(wrapper);
+        document.fonts.ready.then(function(){
+          setTimeout(function(){
+            html2canvas(wrapper,{
+              scale:2, useCORS:true, allowTaint:true, backgroundColor:'#ffffff',
+              logging:false, width:794, height:1123, windowWidth:794, windowHeight:1123,
+              imageTimeout:15000, removeContainer:true
+            }).then(function(canvas){
+              document.body.removeChild(wrapper);
+              var imgData=canvas.toDataURL('image/jpeg',0.98);
+              var pdf=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+              var pw=pdf.internal.pageSize.getWidth();
+              var ph=pdf.internal.pageSize.getHeight();
+              pdf.addImage(imgData,'JPEG',0,0,pw,ph,'','MEDIUM');
+              var blob=pdf.output('blob');
+              resolve({blob:blob, dataUrl:pdf.output('dataurlstring')});
+            }).catch(function(err){
+              if(wrapper.parentNode)document.body.removeChild(wrapper);
+              reject(err);
+            });
+          },150);
+        });
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════
+       PDF METHOD 2: Browser print-to-PDF (fallback)
+       ══════════════════════════════════════════════════════ */
+    function pdfMethod_browserPrint(){
+      return new Promise(function(resolve, reject){
+        try {
+          var A4_W=794, A4_H=1123;
+          var printWin=window.open('','_blank','width='+A4_W+',height='+A4_H);
+          if(!printWin){reject(new Error('POPUP_BLOCKED'));return;}
+          var previewEl=document.getElementById('resume-preview');
+          var resumeHtml=previewEl.innerHTML;
+          var css=getResumeCSS(A4_W,A4_H);
+          printWin.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Resume PDF</title>'
+            +'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+            +'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">'
+            +'<style>'+css+'</style></head><body>'
+            +'<div class="rsm-doc rsm-single font-sans">'+resumeHtml+'</div>'
+            +'</body></html>');
+          printWin.document.close();
+          setTimeout(function(){
+            try {
+              printWin.focus();
+              printWin.print();
+              resolve({dataUrl:null, blob:null, usedPrint:true});
+            } catch(e) {
+              reject(new Error('PRINT_FAILED'));
+            }
+          },1000);
+        } catch(e) {
+          reject(e);
+        }
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════
+       PDF METHOD 3: html2canvas only → JPEG blob download
+       ══════════════════════════════════════════════════════ */
+    function pdfMethod_canvasJpeg(){
+      return new Promise(function(resolve, reject){
+        if(typeof html2canvas==='undefined'){
+          reject(new Error('html2canvas not loaded'));
+          return;
+        }
+        var wrapper=buildPDFWrapper();
+        document.body.appendChild(wrapper);
+        document.fonts.ready.then(function(){
+          setTimeout(function(){
+            html2canvas(wrapper,{
+              scale:2, useCORS:true, allowTaint:true, backgroundColor:'#ffffff',
+              logging:false, width:794, height:1123, windowWidth:794, windowHeight:1123,
+              imageTimeout:15000
+            }).then(function(canvas){
+              document.body.removeChild(wrapper);
+              canvas.toBlob(function(blob){
+                resolve({blob:blob, dataUrl:null, filename:getFileName()+'_resume.jpg'});
+              },'image/jpeg',0.95);
+            }).catch(function(err){
+              if(wrapper.parentNode)document.body.removeChild(wrapper);
+              reject(err);
+            });
+          },150);
+        });
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════
+       PDF METHOD 4: SVG foreignObject inline → download HTML
+       ══════════════════════════════════════════════════════ */
+    function pdfMethod_htmlFallback(){
+      return new Promise(function(resolve){
+        var previewEl=document.getElementById('resume-preview');
+        var css=getResumeCSS(794,1123);
+        var htmlContent='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+getFileName()+'</title>'
+          +'<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+          +'<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">'
+          +'<style>'+css+'</style></head><body style="display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f5f5f5;">'
+          +'<div style="width:794px;height:1123px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.1);">'
+          +previewEl.innerHTML+'</div></body></html>';
+        var blob=new Blob([htmlContent],{type:'text/html'});
+        resolve({blob:blob, dataUrl:null, filename:getFileName()+'_resume.html', isHtml:true});
+      });
+    }
+
+    /* ══════════════════════════════════════════════════════
+       AD OVERLAY MODAL
+       ══════════════════════════════════════════════════════ */
+    var adOverlay=document.getElementById('ad-overlay');
+    var adSkipBtn=document.getElementById('ad-skip-btn');
+    var adTimer=document.getElementById('ad-timer');
+    var adVideoFrame=document.getElementById('ad-video-frame');
+    var adStatus=document.getElementById('ad-status');
+    var adCountdown=5;
+    var adInterval=null;
+
+    function showAdOverlay(){
+      return new Promise(function(resolve){
+        adOverlay.classList.remove('hidden');
+        adOverlay.classList.add('flex');
+        document.body.style.overflow='hidden';
+        adCountdown=5;
+        adTimer.textContent='Skip in '+adCountdown+'s';
+        adSkipBtn.classList.add('hidden');
+        adSkipBtn.disabled=true;
+        adStatus.textContent='Loading ad...';
+
+        // Simulate ad loading (replace with real ad tag later)
+        setTimeout(function(){
+          adStatus.textContent='Watching ad...';
+          adInterval=setInterval(function(){
+            adCountdown--;
+            if(adCountdown<=0){
+              clearInterval(adInterval);
+              adTimer.textContent='Ad complete!';
+              adSkipBtn.classList.remove('hidden');
+              adSkipBtn.disabled=false;
+              adSkipBtn.textContent='Download Now';
+              adStatus.textContent='Your resume is ready!';
+              resolve();
+            } else {
+              adTimer.textContent='Skip in '+adCountdown+'s';
+            }
+          },1000);
+        },1000);
+
+        adSkipBtn.onclick=function(){
+          if(!adSkipBtn.disabled){
+            clearInterval(adInterval);
+            closeAdOverlay();
+            resolve();
+          }
+        };
+      });
+    }
+
+    function closeAdOverlay(){
+      adOverlay.classList.add('hidden');
+      adOverlay.classList.remove('flex');
+      document.body.style.overflow='';
+      if(adInterval)clearInterval(adInterval);
+      adVideoFrame.src='';
+    }
+
+    /* ══════════════════════════════════════════════════════
+       DOWNLOAD HANDLER (with ad + fallbacks)
+       ══════════════════════════════════════════════════════ */
     document.getElementById('start-download').addEventListener('click',function(){
       var btn=document.getElementById('start-download');
       btn.disabled=true;
@@ -539,200 +811,89 @@ const breadcrumbSchema = {
             setTimeout(function(){p.hide();},2000);
             btn.disabled=false;
           }).catch(function(err){
-            showProgress('').setError('DOCX failed: '+err.message);
+            showProgress('').setError('DOCX generation failed: '+err.message+'. Try PDF format instead.');
             btn.disabled=false;
           });
         }catch(err){
-          showProgress('').setError('DOCX failed: '+err.message);
+          showProgress('').setError('DOCX generation failed: '+err.message+'. Try PDF format instead.');
           btn.disabled=false;
         }
         return;
       }
 
-      /* ── PDF generation using local libraries ── */
-      var p=showProgress('Preparing PDF…');
-      p.setPercent(10);
-
-      if(typeof html2canvas==='undefined'||typeof jspdf==='undefined'){
-        p.setError('PDF libraries not loaded. Please refresh the page and try again.');
-        btn.disabled=false;
-        return;
-      }
-
-      p.setPercent(20);
-      document.getElementById('ad-progress').textContent='Rendering resume…';
-
+      /* ── PDF with ad overlay + multi-fallback ── */
       var previewEl=document.getElementById('resume-preview');
       if(!previewEl||!previewEl.innerHTML||previewEl.innerHTML.length<10){
-        p.setError('Resume content not loaded. Please refresh and try again.');
+        showProgress('').setError('Resume content not loaded. Please go back to the builder and try again.');
         btn.disabled=false;
         return;
       }
 
-      var A4_W=794, A4_H=1123;
-      
-      var wrapper=document.createElement('div');
-      wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:'+A4_W+'px;height:'+A4_H+'px;background:#ffffff;overflow:hidden;margin:0;padding:0;';
-      
-      var allStyles=document.createElement('style');
-      allStyles.textContent=`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        html, body { 
-          width: ${A4_W}px; height: ${A4_H}px; 
-          margin: 0; padding: 0; 
-          background: #ffffff;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        .rsm-doc {
-          font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-          font-size: 16px;
-          line-height: 1.6;
-          color: #1B2440;
-          width: ${A4_W}px;
-          height: ${A4_H}px;
-          overflow: hidden;
-          background: #ffffff;
-          box-sizing: border-box;
-        }
-        
-        .rsm-single { 
-          padding: 38px 44px; 
-          display: flex; 
-          flex-direction: column; 
-          height: 100%; 
-        }
-        
-        .rsm-band { padding: 0; height: 100%; display: flex; flex-direction: column; }
-        .rsm-band-top { padding: 28px 44px 20px; }
-        .rsm-band-grid { 
-          display: grid; 
-          grid-template-columns: 1.4fr 1fr; 
-          gap: 28px; 
-          padding: 24px 44px 32px; 
-          flex: 1;
-        }
-        
-        .rsm-sidebar-layout { display: flex; height: 100%; min-height: 0; }
-        .rsm-sidebar { 
-          width: 34%; 
-          padding: 32px 24px; 
-          color: white; 
-          display: flex; 
-          flex-direction: column; 
-          align-items: flex-start;
-          overflow-y: auto;
-          box-sizing: border-box;
-        }
-        .rsm-main { 
-          width: 66%; 
-          padding: 30px 30px; 
-          display: flex; 
-          flex-direction: column;
-          box-sizing: border-box;
-        }
-        
-        .rsm-header { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
-        .rsm-photo { width: 66px; height: 66px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
-        .rsm-photo-fallback { 
-          display: flex; align-items: center; justify-content: center; 
-          color: white; font-weight: 700; font-size: 24px; 
-        }
-        .rsm-name { font-size: 30px; font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; }
-        .rsm-contact { font-size: 13px; color: #5B6B8C; margin-top: 4px; }
-        
-        .rsm-rule { border: none; border-top: 1.5px solid; margin: 16px 0 20px; }
-        .rsm-section { margin-bottom: 18px; }
-        .rsm-section-title { 
-          font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; 
-          font-weight: 700; color: #5B6B8C; margin-bottom: 10px; 
-          padding-bottom: 6px; border-bottom: 2px solid #E2E8F0;
-        }
-        .rsm-body { font-size: 15px; color: #2A3654; line-height: 1.65; }
-        
-        .rsm-item { margin-bottom: 14px; }
-        .rsm-item:last-child { margin-bottom: 0; }
-        .rsm-item-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
-        .rsm-item-title { font-weight: 600; font-size: 16px; color: #1B2440; }
-        .rsm-item-meta { font-size: 13px; color: #5B6B8C; white-space: nowrap; }
-        .rsm-item-sub { font-size: 14px; color: #5B6B8C; }
-        
-        .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; }
-        .rsm-pill { 
-          font-size: 12px; padding: 4px 13px; border: 1.5px solid; 
-          border-radius: 999px; font-weight: 500; line-height: 1.4;
-        }
-        
-        .rsm-links { display: flex; flex-direction: column; gap: 6px; }
-        .rsm-link { font-size: 13px; color: #2A3654; word-break: break-all; }
-        
-        .rsm-sidebar .rsm-photo-fallback { background: rgba(255,255,255,0.2) !important; }
-        .rsm-sidebar .rsm-name-sidebar { font-size: 22px; color: white; margin-top: 14px; font-weight: 700; }
-        .rsm-sidebar .rsm-contact-sidebar { color: rgba(255,255,255,0.85); font-size: 12.5px; margin-top: 4px; }
-        .rsm-sidebar .rsm-section { margin-bottom: 16px; }
-        .rsm-sidebar .rsm-section-title { 
-          color: rgba(255,255,255,0.7); 
-          border-bottom-color: rgba(255,255,255,0.25);
-          font-size: 12px;
-        }
-        .rsm-sidebar .rsm-body, .rsm-sidebar .rsm-item-sub, .rsm-sidebar .rsm-item-meta { 
-          color: rgba(255,255,255,0.9); 
-        }
-        .rsm-sidebar .rsm-item-title { color: white; font-size: 14px; }
-        .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; }
-        .rsm-sidebar .rsm-link { color: rgba(255,255,255,0.9); }
-        .rsm-sidebar-sections { margin-top: 18px; width: 100%; }
-        
-        .font-display { font-family: 'Fraunces', Georgia, serif; }
-        .font-sans { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; }
-      `;
-      
-      wrapper.appendChild(allStyles);
-      
-      var resumeClone=previewEl.cloneNode(true);
-      resumeClone.style.cssText='width:'+A4_W+'px;height:'+A4_H+'px;box-sizing:border-box;';
-      wrapper.appendChild(resumeClone);
-      document.body.appendChild(wrapper);
+      showAdOverlay().then(function(){
+        var p=showProgress('Generating PDF…');
+        p.setPercent(10);
+        document.getElementById('ad-progress').textContent='Trying PDF method 1…';
 
-      document.fonts.ready.then(function(){
-        setTimeout(function(){
-          html2canvas(wrapper,{
-            scale:2,
-            useCORS:true,
-            allowTaint:true,
-            backgroundColor:'#ffffff',
-            logging:false,
-            width:A4_W,
-            height:A4_H,
-            windowWidth:A4_W,
-            windowHeight:A4_H,
-            imageTimeout:15000,
-            removeContainer:true
-          }).then(function(canvas){
-            document.body.removeChild(wrapper);
-            p.setPercent(50);
-            document.getElementById('ad-progress').textContent='Building PDF…';
+        /* Attempt 1: html2canvas + jsPDF */
+        pdfMethod_html2canvas().then(function(result){
+          p.setPercent(60);
+          document.getElementById('ad-progress').textContent='Saving PDF…';
+          if(result.blob){
+            downloadBlob(result.blob, getFileName()+'.pdf');
+          } else if(result.dataUrl){
+            downloadDataURL(result.dataUrl, getFileName()+'.pdf');
+          }
+          p.setPercent(100);
+          document.getElementById('ad-progress').textContent='Downloaded! Your PDF is ready.';
+          setTimeout(function(){p.hide();},2000);
+          btn.disabled=false;
+        }).catch(function(err1){
+          console.warn('PDF Method 1 (html2canvas+jsPDF) failed:', err1.message||err1);
+          p.setPercent(30);
+          document.getElementById('ad-progress').textContent='Method 1 failed, trying print…';
 
-            var imgData=canvas.toDataURL('image/jpeg',0.98);
-            var pdf=new jspdf.jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
-            var pw=pdf.internal.pageSize.getWidth();
-            var ph=pdf.internal.pageSize.getHeight();
-            pdf.addImage(imgData,'JPEG',0,0,pw,ph,'','MEDIUM');
-            p.setPercent(80);
-            pdf.save(getFileName()+'.pdf');
-            p.setPercent(100);
-            document.getElementById('ad-progress').textContent='Downloaded! Your PDF is ready.';
-            setTimeout(function(){p.hide();},2000);
-          }).catch(function(err){
-            if(wrapper.parentNode)document.body.removeChild(wrapper);
-            console.error('PDF error:',err);
-            showProgress('').setError('PDF failed: '+err.message+'. Please try again.');
-          }).finally(function(){
+          /* Attempt 2: Browser print */
+          pdfMethod_browserPrint().then(function(result){
+            if(result.usedPrint){
+              p.setPercent(100);
+              document.getElementById('ad-progress').textContent='Print dialog opened. Save as PDF from there.';
+              setTimeout(function(){p.hide();},3000);
+            }
             btn.disabled=false;
+          }).catch(function(err2){
+            console.warn('PDF Method 2 (browser print) failed:', err2.message||err2);
+            p.setPercent(50);
+            document.getElementById('ad-progress').textContent='Trying JPEG export…';
+
+            /* Attempt 3: Canvas JPEG fallback */
+            pdfMethod_canvasJpeg().then(function(result){
+              p.setPercent(80);
+              document.getElementById('ad-progress').textContent='Saving image…';
+              downloadBlob(result.blob, result.filename||getFileName()+'_resume.jpg');
+              p.setPercent(100);
+              document.getElementById('ad-progress').textContent='Downloaded as high-quality image. You can convert to PDF at smallpdf.com.';
+              setTimeout(function(){p.hide();},3000);
+              btn.disabled=false;
+            }).catch(function(err3){
+              console.warn('PDF Method 3 (canvas JPEG) failed:', err3.message||err3);
+              p.setPercent(70);
+              document.getElementById('ad-progress').textContent='Final fallback…';
+
+              /* Attempt 4: HTML file download */
+              pdfMethod_htmlFallback().then(function(result){
+                downloadBlob(result.blob, result.filename);
+                p.setPercent(100);
+                document.getElementById('ad-progress').textContent='Downloaded as HTML file. Open in browser and print to PDF (Ctrl+P → Save as PDF).';
+                setTimeout(function(){p.hide();},4000);
+                btn.disabled=false;
+              }).catch(function(err4){
+                console.error('All PDF methods failed:', err4);
+                showProgress('').setError('All download methods failed. Please try: 1) Refresh page, 2) Use a different browser, 3) Check your internet connection.');
+                btn.disabled=false;
+              });
+            });
           });
-        },100);
+        });
       });
     });
   })();
