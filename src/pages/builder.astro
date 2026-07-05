@@ -33,7 +33,7 @@ const breadcrumbSchema = {
       </div>
       <div class="flex items-center gap-2 sm:gap-3">
         <select id="template-select" class="neu-select !w-auto !py-2 text-xs sm:text-sm"></select>
-        <button id="mobile-preview-toggle" class="neu-btn-sm lg:hidden text-xs sm:text-sm">Preview</button>
+        <button id="mobile-preview-toggle" class="neu-btn-sm text-xs sm:text-sm">Preview</button>
         <a href="/resumemaker-agent/download" id="download-link" class="neu-btn-primary !px-3 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:text-sm hidden sm:inline-flex">Download</a>
       </div>
     </div>
@@ -157,18 +157,19 @@ const breadcrumbSchema = {
       </div>
     </div>
 
-    <!-- Mobile preview (shown below form on toggle) -->
-    <div id="mobile-preview-section" class="hidden mt-6 lg:hidden">
-      <div class="neu-card p-4">
-        <div class="mb-3 flex items-center justify-between">
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+      <div class="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl p-4 sm:p-6" style="background: var(--neu-bg); box-shadow: 8px 8px 24px rgba(0,0,0,0.3), -8px -8px 24px var(--neu-light);">
+        <button id="preview-modal-close" class="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-lg font-bold transition-colors" style="background: var(--neu-bg); color: var(--neu-text); box-shadow: 2px 2px 4px var(--neu-dark), -2px -2px 4px var(--neu-light);" aria-label="Close">&times;</button>
+        <div class="mb-4">
           <div class="neu-badge inline-block">
-            <p class="eyebrow">Live Preview</p>
+            <p class="eyebrow">Resume Preview</p>
           </div>
-          <button id="mobile-preview-close" class="neu-btn-sm text-xs">Hide</button>
         </div>
-        <div class="rsm-frame mx-auto max-w-sm">
-          <div id="mobile-resume-preview"></div>
+        <div class="rsm-frame mx-auto max-w-sm sm:max-w-md">
+          <div id="modal-resume-preview"></div>
         </div>
+        <a href="/resumemaker-agent/download" class="neu-btn-primary mt-4 w-full justify-center !py-3 text-sm sm:mt-6 sm:!py-3.5 sm:text-base">Download Resume</a>
       </div>
     </div>
   </section>
@@ -252,9 +253,6 @@ const breadcrumbSchema = {
       persist();
       var t = allTemplates.find(function(x){return x.id===tplId;})||allTemplates[0];
       document.getElementById('resume-preview').innerHTML = buildHTML(data, t);
-      if (!mobilePreviewSection.classList.contains('hidden')) {
-        document.getElementById('mobile-resume-preview').innerHTML = buildHTML(data, t);
-      }
     }
 
     /* Basic fields */
@@ -424,25 +422,40 @@ const breadcrumbSchema = {
     }
     renderSwatches();
 
-    /* Mobile toggle */
-    var mobilePreviewSection = document.getElementById('mobile-preview-section');
-    var mobilePreviewClose = document.getElementById('mobile-preview-close');
+    /* Preview Modal */
+    var previewModal = document.getElementById('preview-modal');
+    var previewModalClose = document.getElementById('preview-modal-close');
+    var mobilePreviewToggle = document.getElementById('mobile-preview-toggle');
     
-    document.getElementById('mobile-preview-toggle').addEventListener('click',function(){
-      mobilePreviewSection.classList.toggle('hidden');
-      this.textContent = mobilePreviewSection.classList.contains('hidden') ? 'Preview' : 'Hide Preview';
-      if (!mobilePreviewSection.classList.contains('hidden')) {
-        var t = allTemplates.find(function(x){return x.id===tplId;})||allTemplates[0];
-        document.getElementById('mobile-resume-preview').innerHTML = buildHTML(data, t);
-      }
+    function openPreviewModal() {
+      var t = allTemplates.find(function(x){return x.id===tplId;})||allTemplates[0];
+      document.getElementById('modal-resume-preview').innerHTML = buildHTML(data, t);
+      previewModal.classList.remove('hidden');
+      previewModal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closePreviewModal() {
+      previewModal.classList.add('hidden');
+      previewModal.classList.remove('flex');
+      document.body.style.overflow = '';
+    }
+    
+    mobilePreviewToggle.addEventListener('click', function() {
+      openPreviewModal();
     });
     
-    if (mobilePreviewClose) {
-      mobilePreviewClose.addEventListener('click', function(){
-        mobilePreviewSection.classList.add('hidden');
-        document.getElementById('mobile-preview-toggle').textContent = 'Preview';
-      });
-    }
+    previewModalClose.addEventListener('click', closePreviewModal);
+    
+    previewModal.addEventListener('click', function(e) {
+      if (e.target === previewModal) closePreviewModal();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !previewModal.classList.contains('hidden')) {
+        closePreviewModal();
+      }
+    });
 
     render();
   })();
