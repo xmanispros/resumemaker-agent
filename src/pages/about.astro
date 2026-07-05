@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const title = 'About Us — ResumeMaker Agent | Free Resume Builder';
 const description = 'Learn about ResumeMaker Agent — a free online resume maker with AI-guided builder, 90+ templates, and free PDF download. No payment, no login.';
+const base = import.meta.env.BASE_URL;
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -71,7 +72,7 @@ const aboutSchema = {
       <div class="neu-cta mt-8 text-center">
         <h2 class="text-xl font-semibold" style="color: var(--neu-text);">Ready to build your resume?</h2>
         <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">Start for free — no login, no payment, no surprises.</p>
-        <a href="/resumemaker-agent/builder" class="neu-btn-primary mt-5 inline-flex">Create Resume — It's Free</a>
+        <a href={base + 'builder'} class="neu-btn-primary mt-5 inline-flex">Create Resume — It's Free</a>
       </div>
     </div>
   </section>

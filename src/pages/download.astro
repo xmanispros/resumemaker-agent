@@ -4,6 +4,7 @@ import { templates } from '../lib/templates';
 
 const title = 'Download Your Free Resume PDF / DOCX | ResumeMaker Agent';
 const description = 'Download your resume as PDF or Word (.docx) — no watermark, no login, no payment.';
+const base = import.meta.env.BASE_URL;
 const templatesJson = JSON.stringify(
   templates.map((t) => ({ id: t.id, name: t.name, accent: t.accent, surface: t.surface, layout: t.layout, font: t.font }))
 );
@@ -61,7 +62,7 @@ const breadcrumbSchema = {
     </div>
 
     <p class="mt-4 text-center text-xs sm:mt-6" style="color: var(--neu-text-dim);">
-      Need changes? <a href="/resumemaker-agent/builder" class="text-teal hover:underline">Go back to the builder</a>.
+      Need changes? <a href={base + 'builder'} class="text-teal hover:underline">Go back to the builder</a>.
     </p>
   </section>
 

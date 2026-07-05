@@ -4,6 +4,7 @@ import { templates } from '../lib/templates';
 
 const title = 'Resume Builder — Free Agent-Guided Resume Maker | ResumeMaker Agent';
 const description = 'Build your resume with an AI-guided agent. Live preview, multiple templates, free download.';
+const base = import.meta.env.BASE_URL;
 
 const templatesJson = JSON.stringify(
   templates.map((t) => ({
@@ -34,7 +35,7 @@ const breadcrumbSchema = {
       <div class="flex items-center gap-2 sm:gap-3">
         <select id="template-select" class="neu-select !w-auto !py-2 text-xs sm:text-sm"></select>
         <button id="mobile-preview-toggle" class="neu-btn-sm text-xs sm:text-sm">Preview</button>
-        <a href="/resumemaker-agent/download" id="download-link" class="neu-btn-primary !px-3 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:text-sm hidden sm:inline-flex">Download</a>
+        <a href={base + 'download'} id="download-link" class="neu-btn-primary !px-3 !py-2 text-xs sm:!px-5 sm:!py-2.5 sm:text-sm hidden sm:inline-flex">Download</a>
       </div>
     </div>
 
@@ -139,7 +140,7 @@ const breadcrumbSchema = {
         </div>
 
         <!-- Download button (bottom) -->
-        <a href="/resumemaker-agent/download" class="neu-btn-primary w-full justify-center !py-3 text-sm sm:!py-3.5 sm:text-base">Download Resume</a>
+        <a href={base + 'download'} class="neu-btn-primary w-full justify-center !py-3 text-sm sm:!py-3.5 sm:text-base">Download Resume</a>
       </div>
 
       <!-- PREVIEW COLUMN -->
@@ -169,7 +170,7 @@ const breadcrumbSchema = {
         <div class="rsm-frame mx-auto max-w-sm sm:max-w-md">
           <div id="modal-resume-preview"></div>
         </div>
-        <a href="/resumemaker-agent/download" class="neu-btn-primary mt-4 w-full justify-center !py-3 text-sm sm:mt-6 sm:!py-3.5 sm:text-base">Download Resume</a>
+        <a href={base + 'download'} class="neu-btn-primary mt-4 w-full justify-center !py-3 text-sm sm:mt-6 sm:!py-3.5 sm:text-base">Download Resume</a>
       </div>
     </div>
   </section>

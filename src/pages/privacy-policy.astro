@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const title = 'Privacy Policy | ResumeMaker Agent';
 const description = 'How ResumeMaker Agent handles your data. Your resume content stays on your device — we do not require login or store your resume on a server.';
+const base = import.meta.env.BASE_URL;
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -61,7 +62,7 @@ const breadcrumbSchema = {
       <div>
         <h2 class="text-lg font-semibold" style="color: var(--neu-text);">Contact</h2>
         <p class="mt-2 text-sm" style="color: var(--neu-text-dim);">
-          Questions about this policy? Visit our <a href="/resumemaker-agent/contact" class="text-teal hover:underline">Contact Us</a> page.
+          Questions about this policy? Visit our <a href={base + 'contact'} class="text-teal hover:underline">Contact Us</a> page.
         </p>
       </div>
     </div>
