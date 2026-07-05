@@ -52,6 +52,7 @@ const breadcrumbSchema = {
       </div>
 
       <button id="start-download" class="neu-btn-primary mt-4 w-full justify-center sm:mt-5">Download Resume</button>
+      <button id="direct-download" class="mt-2 w-full text-center text-xs font-medium underline transition-colors sm:mt-3" style="color: var(--neu-text-dim);">Skip ad &amp; download directly</button>
       <div id="download-progress" class="mt-3 hidden">
         <div class="neu-slider-track">
           <div id="progress-fill" class="neu-slider-fill" style="width: 0%;"></div>
@@ -580,8 +581,8 @@ const breadcrumbSchema = {
         .rsm-item-title { font-weight: 600; font-size: 16px; color: #1B2440; }
         .rsm-item-meta { font-size: 13px; color: #5B6B8C; white-space: nowrap; }
         .rsm-item-sub { font-size: 14px; color: #5B6B8C; }
-        .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; }
-        .rsm-pill { font-size: 12px; padding: 4px 13px; border: 1.5px solid; border-radius: 999px; font-weight: 500; line-height: 1.4; }
+        .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; justify-content: flex-start; }
+        .rsm-pill { font-size: 12px; padding: 5px 14px; border: 1.5px solid; border-radius: 999px; font-weight: 500; line-height: 1.3; text-align: center; display: inline-flex; align-items: center; justify-content: center; min-width: 40px; }
         .rsm-links { display: flex; flex-direction: column; gap: 6px; }
         .rsm-link { font-size: 13px; color: #2A3654; word-break: break-all; }
         .rsm-sidebar .rsm-photo-fallback { background: rgba(255,255,255,0.2) !important; }
@@ -591,7 +592,7 @@ const breadcrumbSchema = {
         .rsm-sidebar .rsm-section-title { color: rgba(255,255,255,0.7); border-bottom-color: rgba(255,255,255,0.25); font-size: 12px; }
         .rsm-sidebar .rsm-body, .rsm-sidebar .rsm-item-sub, .rsm-sidebar .rsm-item-meta { color: rgba(255,255,255,0.9); }
         .rsm-sidebar .rsm-item-title { color: white; font-size: 14px; }
-        .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; }
+        .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
         .rsm-sidebar .rsm-link { color: rgba(255,255,255,0.9); }
         .rsm-sidebar-sections { margin-top: 18px; width: 100%; }
         .font-display { font-family: 'Fraunces', Georgia, serif; }
@@ -602,13 +603,13 @@ const breadcrumbSchema = {
     function buildPDFWrapper(){
       var A4_W=794, A4_H=1123;
       var wrapper=document.createElement('div');
-      wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:'+A4_W+'px;height:'+A4_H+'px;background:#ffffff;overflow:hidden;margin:0;padding:0;';
+      wrapper.style.cssText='position:absolute;left:-9999px;top:0;width:'+A4_W+'px;height:'+A4_H+'px;background:#ffffff;overflow:hidden;margin:0;padding:0;font-family:Inter,Segoe UI,system-ui,-apple-system,sans-serif;';
       var allStyles=document.createElement('style');
       allStyles.textContent=getResumeCSS(A4_W,A4_H);
       wrapper.appendChild(allStyles);
       var previewEl=document.getElementById('resume-preview');
       var resumeClone=previewEl.cloneNode(true);
-      resumeClone.style.cssText='width:'+A4_W+'px;height:'+A4_H+'px;box-sizing:border-box;';
+      resumeClone.style.cssText='width:'+A4_W+'px;height:'+A4_H+'px;box-sizing:border-box;overflow:hidden;background:#ffffff;';
       wrapper.appendChild(resumeClone);
       return wrapper;
     }
@@ -793,9 +794,11 @@ const breadcrumbSchema = {
     /* ══════════════════════════════════════════════════════
        DOWNLOAD HANDLER (with ad + fallbacks)
        ══════════════════════════════════════════════════════ */
-    document.getElementById('start-download').addEventListener('click',function(){
+    function runDownload(skipAd){
       var btn=document.getElementById('start-download');
+      var directBtn=document.getElementById('direct-download');
       btn.disabled=true;
+      if(directBtn)directBtn.style.pointerEvents='none';
 
       if(selectedFormat==='docx'){
         var p=showProgress('Generating Word document…');
@@ -812,13 +815,16 @@ const breadcrumbSchema = {
             document.getElementById('ad-progress').textContent='Downloaded! Your Word file is ready.';
             setTimeout(function(){p.hide();},2000);
             btn.disabled=false;
+            if(directBtn)directBtn.style.pointerEvents='';
           }).catch(function(err){
             showProgress('').setError('DOCX generation failed: '+err.message+'. Try PDF format instead.');
             btn.disabled=false;
+            if(directBtn)directBtn.style.pointerEvents='';
           });
         }catch(err){
           showProgress('').setError('DOCX generation failed: '+err.message+'. Try PDF format instead.');
           btn.disabled=false;
+          if(directBtn)directBtn.style.pointerEvents='';
         }
         return;
       }
@@ -828,10 +834,11 @@ const breadcrumbSchema = {
       if(!previewEl||!previewEl.innerHTML||previewEl.innerHTML.length<10){
         showProgress('').setError('Resume content not loaded. Please go back to the builder and try again.');
         btn.disabled=false;
+        if(directBtn)directBtn.style.pointerEvents='';
         return;
       }
 
-      showAdOverlay().then(function(){
+      function attemptPDF(){
         var p=showProgress('Generating PDF…');
         p.setPercent(10);
         document.getElementById('ad-progress').textContent='Trying PDF method 1…';
@@ -849,6 +856,7 @@ const breadcrumbSchema = {
           document.getElementById('ad-progress').textContent='Downloaded! Your PDF is ready.';
           setTimeout(function(){p.hide();},2000);
           btn.disabled=false;
+          if(directBtn)directBtn.style.pointerEvents='';
         }).catch(function(err1){
           console.warn('PDF Method 1 (html2canvas+jsPDF) failed:', err1.message||err1);
           p.setPercent(30);
@@ -862,6 +870,7 @@ const breadcrumbSchema = {
               setTimeout(function(){p.hide();},3000);
             }
             btn.disabled=false;
+            if(directBtn)directBtn.style.pointerEvents='';
           }).catch(function(err2){
             console.warn('PDF Method 2 (browser print) failed:', err2.message||err2);
             p.setPercent(50);
@@ -876,6 +885,7 @@ const breadcrumbSchema = {
               document.getElementById('ad-progress').textContent='Downloaded as high-quality image. You can convert to PDF at smallpdf.com.';
               setTimeout(function(){p.hide();},3000);
               btn.disabled=false;
+              if(directBtn)directBtn.style.pointerEvents='';
             }).catch(function(err3){
               console.warn('PDF Method 3 (canvas JPEG) failed:', err3.message||err3);
               p.setPercent(70);
@@ -888,16 +898,29 @@ const breadcrumbSchema = {
                 document.getElementById('ad-progress').textContent='Downloaded as HTML file. Open in browser and print to PDF (Ctrl+P → Save as PDF).';
                 setTimeout(function(){p.hide();},4000);
                 btn.disabled=false;
+                if(directBtn)directBtn.style.pointerEvents='';
               }).catch(function(err4){
                 console.error('All PDF methods failed:', err4);
                 showProgress('').setError('All download methods failed. Please try: 1) Refresh page, 2) Use a different browser, 3) Check your internet connection.');
                 btn.disabled=false;
+                if(directBtn)directBtn.style.pointerEvents='';
               });
             });
           });
         });
-      });
-    });
+      }
+
+      if(skipAd){
+        attemptPDF();
+      } else {
+        showAdOverlay().then(function(){
+          attemptPDF();
+        });
+      }
+    }
+
+    document.getElementById('start-download').addEventListener('click',function(){runDownload(false);});
+    document.getElementById('direct-download').addEventListener('click',function(){runDownload(true);});
   })();
   </script>
 </BaseLayout>

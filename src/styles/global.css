@@ -528,8 +528,8 @@
   .rsm-item-title { font-weight: 600; font-size: 16px; color: #1B2440; }
   .rsm-item-meta { font-size: 13px; color: #5B6B8C; white-space: nowrap; }
   .rsm-item-sub { font-size: 14px; color: #5B6B8C; }
-  .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; }
-  .rsm-pill { font-size: 12px; padding: 4px 13px; border: 1.5px solid; border-radius: 999px; font-weight: 500; line-height: 1.4; }
+  .rsm-skills { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; justify-content: flex-start; }
+  .rsm-pill { font-size: 12px; padding: 5px 14px; border: 1.5px solid; border-radius: 999px; font-weight: 500; line-height: 1.3; text-align: center; display: inline-flex; align-items: center; justify-content: center; min-width: 40px; }
   .rsm-links { display: flex; flex-direction: column; gap: 6px; }
   .rsm-link { font-size: 13px; color: #2A3654; word-break: break-all; }
   .rsm-band-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; padding: 24px 44px 32px; }
@@ -543,7 +543,7 @@
   .rsm-sidebar .rsm-section-title { color: rgba(255,255,255,0.7); border-bottom-color: rgba(255,255,255,0.25); font-size: 12px; }
   .rsm-sidebar .rsm-body, .rsm-sidebar .rsm-item-sub, .rsm-sidebar .rsm-item-meta { color: rgba(255,255,255,0.9); }
   .rsm-sidebar .rsm-item-title { color: white; font-size: 14px; }
-  .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; }
+  .rsm-sidebar .rsm-pill { border-color: rgba(255,255,255,0.5) !important; color: white !important; font-size: 11px; padding: 3px 11px; display: inline-flex; align-items: center; justify-content: center; text-align: center; }
   .rsm-sidebar .rsm-link { color: rgba(255,255,255,0.9); }
   .rsm-sidebar-sections { margin-top: 18px; width: 100%; }
   .rsm-main { width: 66%; padding: 30px 30px; display: flex; flex-direction: column; }
